@@ -22,7 +22,7 @@ MELT_CONDITION = [ConditionOpcode.CREATE_COIN, 0, ESCAPE_VALUE]
 
 # Given the parent and amount of the launcher coin, return the launcher coin
 def generate_launcher_coin(coin: Coin, amount: uint64) -> Coin:
-    return Coin(coin.name(), SINGLETON_LAUNCHER_HASH, amount)
+    return Coin(coin.id(), SINGLETON_LAUNCHER_HASH, amount)
 
 
 # Wrap inner puzzles that are not singleton specific to strip away "truths"
@@ -43,7 +43,7 @@ def launch_conditions_and_coinsol(
 
     launcher_coin = generate_launcher_coin(coin, amount)
     curried_singleton = SINGLETON_MOD.curry(
-        (SINGLETON_MOD_HASH, (launcher_coin.name(), SINGLETON_LAUNCHER_HASH)),
+        (SINGLETON_MOD_HASH, (launcher_coin.id(), SINGLETON_LAUNCHER_HASH)),
         inner_puzzle,
     )
 
@@ -64,7 +64,7 @@ def launch_conditions_and_coinsol(
     assert_launcher_announcement = Program.to(
         [
             ConditionOpcode.ASSERT_COIN_ANNOUNCEMENT,
-            std_hash(launcher_coin.name() + launcher_solution.get_tree_hash()),
+            std_hash(launcher_coin.id() + launcher_solution.get_tree_hash()),
         ],
     )
 
@@ -81,7 +81,7 @@ def launch_conditions_and_coinsol(
 
 # Take a coin solution, return a lineage proof for their child to use in spends
 def lineage_proof_for_coinsol(coin_solution: CoinSolution) -> LineageProof:
-    parent_name = coin_solution.coin.parent_coin_info
+    parent_name = coin_solution.coin.parent_coin_id
 
     inner_puzzle_hash = None
     if coin_solution.coin.puzzle_hash != SINGLETON_LAUNCHER_HASH:
@@ -148,7 +148,7 @@ def pay_to_singleton_or_delay_puzzle(launcher_id: bytes32, delay_time: uint64, d
 
 # Solution for EITHER p2_singleton or the claiming spend case for p2_singleton_or_delayed_puzhash
 def solution_for_p2_singleton(p2_singleton_coin: Coin, singleton_inner_puzhash: bytes32) -> Program:
-    return Program.to([singleton_inner_puzhash, p2_singleton_coin.name()])
+    return Program.to([singleton_inner_puzhash, p2_singleton_coin.id()])
 
 
 # Solution for the delayed spend case for p2_singleton_or_delayed_puzhash
@@ -162,8 +162,8 @@ def claim_p2_singleton(
     singleton_inner_puzhash: bytes32,
     launcher_id: bytes32,
 ) -> Tuple[Program, Program, CoinSolution]:
-    assertion = Program.to([ConditionOpcode.ASSERT_COIN_ANNOUNCEMENT, std_hash(p2_singleton_coin.name() + b"$")])
-    announcement = Program.to([ConditionOpcode.CREATE_PUZZLE_ANNOUNCEMENT, p2_singleton_coin.name()])
+    assertion = Program.to([ConditionOpcode.ASSERT_COIN_ANNOUNCEMENT, std_hash(p2_singleton_coin.id() + b"$")])
+    announcement = Program.to([ConditionOpcode.CREATE_PUZZLE_ANNOUNCEMENT, p2_singleton_coin.id()])
     claim_coinsol = CoinSolution(
         p2_singleton_coin,
         pay_to_singleton_puzzle(launcher_id),

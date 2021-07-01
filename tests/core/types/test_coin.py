@@ -13,7 +13,7 @@ def coin_serialize(amount: uint64, clvm_serialize: bytes, full_serialize: bytes)
     expected_serialization = (b"a" * 32) + (b"b" * 32) + full_serialize
 
     assert c.get_hash() == std_hash(expected_hash)
-    assert c.name() == std_hash(expected_hash)
+    assert c.id() == std_hash(expected_hash)
     f = io.BytesIO()
     c.stream(f)
     assert bytes(f.getvalue()) == expected_serialization

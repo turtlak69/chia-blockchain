@@ -275,18 +275,18 @@ class WalletTransactionStore:
         records = []
         for row in rows:
             record = TransactionRecord.from_bytes(row[0])
-            if record.name in self.tx_submitted:
-                time_submitted, count = self.tx_submitted[record.name]
+            if record.id in self.tx_submitted:
+                time_submitted, count = self.tx_submitted[record.id]
                 if time_submitted < current_time - (60 * 10):
                     records.append(record)
-                    self.tx_submitted[record.name] = current_time, 1
+                    self.tx_submitted[record.id] = current_time, 1
                 else:
                     if count < 5:
                         records.append(record)
-                        self.tx_submitted[record.name] = time_submitted, (count + 1)
+                        self.tx_submitted[record.id] = time_submitted, (count + 1)
             else:
                 records.append(record)
-                self.tx_submitted[record.name] = current_time, 1
+                self.tx_submitted[record.id] = current_time, 1
 
         return records
 
@@ -394,7 +394,7 @@ class WalletTransactionStore:
         for row in rows:
             record = TransactionRecord.from_bytes(row[0])
             records.append(record)
-            cache_set.add(record.name)
+            cache_set.add(record.id)
 
         return records
 

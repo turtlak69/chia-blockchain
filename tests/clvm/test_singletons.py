@@ -48,7 +48,7 @@ def sign_delegated_puz(del_puz: Program, coin: Coin) -> G2Element:
     )
     return AugSchemeMPL.sign(
         synthetic_secret_key,
-        (del_puz.get_tree_hash() + coin.name() + DEFAULT_CONSTANTS.AGG_SIG_ME_ADDITIONAL_DATA),  # noqa
+        (del_puz.get_tree_hash() + coin.id() + DEFAULT_CONSTANTS.AGG_SIG_ME_ADDITIONAL_DATA),  # noqa
     )
 
 
@@ -138,7 +138,7 @@ class TestSingleton(TestCase):
             starting_coin,
             START_AMOUNT,
         )
-        launcher_id: bytes32 = launcher_coin.name()
+        launcher_id: bytes32 = launcher_coin.id()
         # This delegated puzzle just recreates the coin exactly
         delegated_puzzle: Program = Program.to(
             (

@@ -188,7 +188,7 @@ class PoolWallet:
         launcher_coin: Coin = all_spends[0].coin
         delayed_seconds, delayed_puzhash = get_delayed_puz_info_from_launcher_spend(all_spends[0])
         tip_singleton_coin: Optional[Coin] = get_most_recent_singleton_coin_from_coin_solution(all_spends[-1])
-        launcher_id: bytes32 = launcher_coin.name()
+        launcher_id: bytes32 = launcher_coin.id()
         p2_singleton_puzzle_hash = launcher_id_to_p2_puzzle_hash(launcher_id, delayed_seconds, delayed_puzhash)
         assert tip_singleton_coin is not None
 
@@ -204,7 +204,7 @@ class PoolWallet:
         assert extra_data is not None
         current_inner = pool_state_to_inner_puzzle(
             extra_data,
-            launcher_coin.name(),
+            launcher_coin.id(),
             self.wallet_state_manager.constants.GENESIS_CHALLENGE,
             delayed_seconds,
             delayed_puzhash,
@@ -216,7 +216,7 @@ class PoolWallet:
             launcher_id,
             p2_singleton_puzzle_hash,
             current_inner,
-            tip_singleton_coin.name(),
+            tip_singleton_coin.id(),
             last_singleton_spend_height,
         )
 
@@ -260,7 +260,7 @@ class PoolWallet:
         # If we return a value, it is a coin ID that we are also interested in (to support two transitions per block)
         coin: Optional[Coin] = get_most_recent_singleton_coin_from_coin_solution(spend)
         if coin is not None:
-            return [coin.name()]
+            return [coin.id()]
         return []
 
     async def apply_state_transitions(self, block_spends: List[CoinSolution], block_height: uint32):
@@ -269,7 +269,7 @@ class PoolWallet:
         that we are not interested in, and can contain many ephemeral spends. They must all be in the same block.
         The DB must be committed after calling this method. All validation should be done here.
         """
-        coin_name_to_spend: Dict[bytes32, CoinSolution] = {cs.coin.name(): cs for cs in block_spends}
+        coin_name_to_spend: Dict[bytes32, CoinSolution] = {cs.coin.id(): cs for cs in block_spends}
 
         tip: Tuple[uint32, CoinSolution] = await self.get_tip()
         tip_height = tip[0]
@@ -279,7 +279,7 @@ class PoolWallet:
         while True:
             tip_coin: Optional[Coin] = get_most_recent_singleton_coin_from_coin_solution(tip_spend)
             assert tip_coin is not None
-            spent_coin_name: bytes32 = tip_coin.name()
+            spent_coin_name: bytes32 = tip_coin.id()
             if spent_coin_name not in coin_name_to_spend:
                 break
             spend: CoinSolution = coin_name_to_spend[spent_coin_name]
@@ -351,7 +351,7 @@ class PoolWallet:
 
         launcher_spend: Optional[CoinSolution] = None
         for spend in block_spends:
-            if spend.coin.name() == launcher_coin_id:
+            if spend.coin.id() == launcher_coin_id:
                 launcher_spend = spend
         assert launcher_spend is not None
         await self.wallet_state_manager.pool_store.add_spend(self.wallet_id, launcher_spend, block_height)
@@ -491,13 +491,13 @@ class PoolWallet:
 
         new_inner_puzzle = pool_state_to_inner_puzzle(
             next_state,
-            pool_wallet_info.launcher_coin.name(),
+            pool_wallet_info.launcher_coin.id(),
             self.wallet_state_manager.constants.GENESIS_CHALLENGE,
             delayed_seconds,
             delayed_puzhash,
         )
         new_full_puzzle: SerializedProgram = SerializedProgram.from_program(
-            create_full_puzzle(new_inner_puzzle, pool_wallet_info.launcher_coin.name())
+            create_full_puzzle(new_inner_puzzle, pool_wallet_info.launcher_coin.id())
         )
 
         outgoing_coin_solution, inner_puzzle = create_travel_spend(
@@ -513,9 +513,9 @@ class PoolWallet:
         tip = (await self.get_tip())[1]
         tip_coin = tip.coin
         singleton = tip.additions()[0]
-        singleton_id = singleton.name()
-        assert outgoing_coin_solution.coin.parent_coin_info == tip_coin.name()
-        assert outgoing_coin_solution.coin.name() == singleton_id
+        singleton_id = singleton.id()
+        assert outgoing_coin_solution.coin.parent_coin_id == tip_coin.id()
+        assert outgoing_coin_solution.coin.id() == singleton_id
         assert new_inner_puzzle != inner_puzzle
         if is_pool_member_inner_puzzle(inner_puzzle):
             (
@@ -546,7 +546,7 @@ class PoolWallet:
         signed_spend_bundle = await self.sign(outgoing_coin_solution)
 
         assert signed_spend_bundle.removals()[0].puzzle_hash == singleton.puzzle_hash
-        assert signed_spend_bundle.removals()[0].name() == singleton.name()
+        assert signed_spend_bundle.removals()[0].id() == singleton.id()
         assert signed_spend_bundle is not None
 
         tx_record = TransactionRecord(
@@ -590,13 +590,13 @@ class PoolWallet:
 
         launcher_parent: Coin = coins.copy().pop()
         genesis_launcher_puz: Program = SINGLETON_LAUNCHER
-        launcher_coin: Coin = Coin(launcher_parent.name(), genesis_launcher_puz.get_tree_hash(), amount)
+        launcher_coin: Coin = Coin(launcher_parent.id(), genesis_launcher_puz.get_tree_hash(), amount)
 
         escaping_inner_puzzle: bytes32 = create_waiting_room_inner_puzzle(
             initial_target_state.target_puzzle_hash,
             initial_target_state.relative_lock_height,
             initial_target_state.owner_pubkey,
-            launcher_coin.name(),
+            launcher_coin.id(),
             genesis_challenge,
             delay_time,
             delay_ph,
@@ -607,7 +607,7 @@ class PoolWallet:
             initial_target_state.target_puzzle_hash,
             escaping_inner_puzzle_hash,
             initial_target_state.owner_pubkey,
-            launcher_coin.name(),
+            launcher_coin.id(),
             genesis_challenge,
             delay_time,
             delay_ph,
@@ -619,13 +619,13 @@ class PoolWallet:
             puzzle = self_pooling_inner_puzzle
         else:
             raise ValueError("Invalid initial state")
-        full_pooling_puzzle: Program = create_full_puzzle(puzzle, launcher_id=launcher_coin.name())
+        full_pooling_puzzle: Program = create_full_puzzle(puzzle, launcher_id=launcher_coin.id())
 
         puzzle_hash: bytes32 = full_pooling_puzzle.get_tree_hash()
         extra_data_bytes = Program.to([("p", bytes(initial_target_state)), ("t", delay_time), ("h", delay_ph)])
         announcement_set: Set[Announcement] = set()
         announcement_message = Program.to([puzzle_hash, amount, extra_data_bytes]).get_tree_hash()
-        announcement_set.add(Announcement(launcher_coin.name(), announcement_message).name())
+        announcement_set.add(Announcement(launcher_coin.id(), announcement_message).name())
 
         create_launcher_tx_record: Optional[TransactionRecord] = await standard_wallet.generate_signed_transaction(
             amount,
@@ -650,7 +650,7 @@ class PoolWallet:
 
         # Current inner will be updated when state is verified on the blockchain
         full_spend: SpendBundle = SpendBundle.aggregate([create_launcher_tx_record.spend_bundle, launcher_sb])
-        return full_spend, puzzle_hash, launcher_coin.name()
+        return full_spend, puzzle_hash, launcher_coin.id()
 
     async def join_pool(self, target_state: PoolState):
 
@@ -767,7 +767,7 @@ class PoolWallet:
             all_spends += absorb_spend
             total_amount += coin_record.coin.amount
             self.log.info(
-                f"Farmer coin: {coin_record.coin} {coin_record.coin.name()} {coin_to_height_farmed[coin_record.coin]}"
+                f"Farmer coin: {coin_record.coin} {coin_record.coin.id()} {coin_to_height_farmed[coin_record.coin]}"
             )
 
         # No signatures are required to absorb
@@ -825,7 +825,7 @@ class PoolWallet:
                 next_tip: Optional[Coin] = get_most_recent_singleton_coin_from_coin_solution(tip_spend)
                 assert next_tip is not None
 
-                if any([rem.name() == next_tip.name() for tx_rec in unconfirmed for rem in tx_rec.removals]):
+                if any([rem.id() == next_tip.id() for tx_rec in unconfirmed for rem in tx_rec.removals]):
                     self.log.info("Already submitted second transaction, will not resubmit.")
                     return
 

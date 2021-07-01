@@ -115,7 +115,7 @@ class CoinStore:
         if row is not None:
             coin = Coin(bytes32(bytes.fromhex(row[6])), bytes32(bytes.fromhex(row[5])), uint64.from_bytes(row[7]))
             record = CoinRecord(coin, row[1], row[2], row[3], row[4], row[8])
-            self.coin_record_cache.put(record.coin.name(), record)
+            self.coin_record_cache.put(record.coin.id(), record)
             return record
         return None
 
@@ -208,7 +208,7 @@ class CoinStore:
                     coin_record.coinbase,
                     coin_record.timestamp,
                 )
-                self.coin_record_cache.put(coin_record.coin.name(), new_record)
+                self.coin_record_cache.put(coin_record.coin.id(), new_record)
             if int(coin_record.confirmed_block_index) > block_index:
                 delete_queue.append(coin_name)
 
@@ -226,19 +226,19 @@ class CoinStore:
 
     # Store CoinRecord in DB and ram cache
     async def _add_coin_record(self, record: CoinRecord, allow_replace: bool) -> None:
-        if self.coin_record_cache.get(record.coin.name()) is not None:
-            self.coin_record_cache.remove(record.coin.name())
+        if self.coin_record_cache.get(record.coin.id()) is not None:
+            self.coin_record_cache.remove(record.coin.id())
 
         cursor = await self.coin_record_db.execute(
             f"INSERT {'OR REPLACE ' if allow_replace else ''}INTO coin_record VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
-                record.coin.name().hex(),
+                record.coin.id().hex(),
                 record.confirmed_block_index,
                 record.spent_block_index,
                 int(record.spent),
                 int(record.coinbase),
                 str(record.coin.puzzle_hash.hex()),
-                str(record.coin.parent_coin_info.hex()),
+                str(record.coin.parent_coin_id.hex()),
                 bytes(record.coin.amount),
                 record.timestamp,
             ),

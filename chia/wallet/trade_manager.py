@@ -79,9 +79,9 @@ class TradeManager:
 
         for trade in all_pending:
             for coin in trade.removals:
-                removals[coin.name()] = coin
+                removals[coin.id()] = coin
             for coin in trade.additions:
-                additions[coin.name()] = coin
+                additions[coin.id()] = coin
 
         return removals, additions
 
@@ -107,16 +107,16 @@ class TradeManager:
         addition_dict = {}
         checked: Dict[bytes32, Coin] = {}
         for coin in removals:
-            removal_dict[coin.name()] = coin
+            removal_dict[coin.id()] = coin
         for coin in additions:
-            addition_dict[coin.name()] = coin
+            addition_dict[coin.id()] = coin
 
         all_coins = []
         all_coins.extend(removals)
         all_coins.extend(additions)
 
         for coin in all_coins:
-            if coin.name() in checked:
+            if coin.id() in checked:
                 continue
             trade = await self.get_trade_by_coin(coin)
             if trade is None:
@@ -127,15 +127,15 @@ class TradeManager:
             # If coin is missing, trade failed
             failed = False
             for removed_coin in trade.removals:
-                if removed_coin.name() not in removal_dict:
+                if removed_coin.id() not in removal_dict:
                     self.log.error(f"{removed_coin} from trade not removed")
                     failed = True
-                checked[removed_coin.name()] = removed_coin
+                checked[removed_coin.id()] = removed_coin
             for added_coin in trade.additions:
-                if added_coin.name() not in addition_dict:
+                if added_coin.id() not in addition_dict:
                     self.log.error(f"{added_coin} from trade not added")
                     failed = True
-                checked[coin.name()] = coin
+                checked[coin.id()] = coin
 
             if failed is False:
                 # Mark this trade as successful
@@ -187,10 +187,10 @@ class TradeManager:
         result = {}
         removals = bundle.removals()
         for coin in removals:
-            coin_record = await self.wallet_state_manager.coin_store.get_coin_record(coin.name())
+            coin_record = await self.wallet_state_manager.coin_store.get_coin_record(coin.id())
             if coin_record is None:
                 continue
-            result[coin_record.name()] = coin_record
+            result[coin_record.id()] = coin_record
         return result
 
     async def cancel_pending_offer(self, trade_id: bytes32):
@@ -206,7 +206,7 @@ class TradeManager:
         all_coins = trade.removals
 
         for coin in all_coins:
-            wallet = await self.wallet_state_manager.get_wallet_for_coin(coin.name())
+            wallet = await self.wallet_state_manager.get_wallet_for_coin(coin.id())
 
             if wallet is None:
                 continue
@@ -457,11 +457,11 @@ class TradeManager:
             genesis_id = genesis_coin_id_for_genesis_coin_checker(Program.from_bytes(bytes.fromhex(colour)))
             # Make the rest of the coins assert the output coin is consumed
             for coloured_coin in my_cc_spends:
-                inner_solution = self.wallet_state_manager.main_wallet.make_solution(consumed=[my_output_coin.name()])
+                inner_solution = self.wallet_state_manager.main_wallet.make_solution(consumed=[my_output_coin.id()])
                 inner_puzzle = await self.get_inner_puzzle_for_puzzle_hash(coloured_coin.puzzle_hash)
                 assert inner_puzzle is not None
 
-                sigs = await wallets[colour].get_sigs(inner_puzzle, inner_solution, coloured_coin.name())
+                sigs = await wallets[colour].get_sigs(inner_puzzle, inner_solution, coloured_coin.id())
                 sigs.append(aggsig)
                 aggsig = AugSchemeMPL.aggregate(sigs)
 
@@ -496,7 +496,7 @@ class TradeManager:
             spendable_cc_list.append(SpendableCC(my_output_coin, genesis_id, inner_puzzle, lineage_proof))
             innersol_list.append(inner_solution)
 
-            sigs = await wallets[colour].get_sigs(inner_puzzle, inner_solution, my_output_coin.name())
+            sigs = await wallets[colour].get_sigs(inner_puzzle, inner_solution, my_output_coin.id())
             sigs.append(aggsig)
             aggsig = AugSchemeMPL.aggregate(sigs)
             if spend_bundle is None:

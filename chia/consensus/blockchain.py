@@ -688,7 +688,7 @@ class Blockchain(BlockchainInterface):
                 ]
                 removed: List[CoinRecord] = await self.coin_store.get_coins_removed_at_height(block.height)
                 header = get_block_header(
-                    block, [record.coin for record in tx_additions], [record.coin.name() for record in removed]
+                    block, [record.coin for record in tx_additions], [record.coin.id() for record in removed]
                 )
             header_blocks[header.header_hash] = header
 

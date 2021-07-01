@@ -265,13 +265,13 @@ class Wallet:
         for coinrecord in unspent:
             if sum_value >= amount and len(used_coins) > 0:
                 break
-            if coinrecord.coin.name() in unconfirmed_removals:
+            if coinrecord.coin.id() in unconfirmed_removals:
                 continue
             if coinrecord.coin in exclude:
                 continue
             sum_value += coinrecord.coin.amount
             used_coins.add(coinrecord.coin)
-            self.log.debug(f"Selected coin: {coinrecord.coin.name()} at height {coinrecord.confirmed_block_height}!")
+            self.log.debug(f"Selected coin: {coinrecord.coin.id()} at height {coinrecord.confirmed_block_height}!")
 
         # This happens when we couldn't use one of the coins because it's already used
         # but unconfirmed, and we are waiting for the change. (unconfirmed_additions)
@@ -336,7 +336,7 @@ class Wallet:
             puzzle: Program = await self.puzzle_for_puzzle_hash(coin.puzzle_hash)
 
             # Only one coin creates outputs
-            if primary_announcement_hash is None and origin_id in (None, coin.name()):
+            if primary_announcement_hash is None and origin_id in (None, coin.id()):
                 if primaries is None:
                     primaries = [{"puzzlehash": newpuzzlehash, "amount": amount}]
                 else:
@@ -344,9 +344,9 @@ class Wallet:
                 if change > 0:
                     change_puzzle_hash: bytes32 = await self.get_new_puzzlehash()
                     primaries.append({"puzzlehash": change_puzzle_hash, "amount": change})
-                message_list: List[bytes32] = [c.name() for c in coins]
+                message_list: List[bytes32] = [c.id() for c in coins]
                 for primary in primaries:
-                    message_list.append(Coin(coin.name(), primary["puzzlehash"], primary["amount"]).name())
+                    message_list.append(Coin(coin.id(), primary["puzzlehash"], primary["amount"]).id())
                 message: bytes32 = std_hash(b"".join(message_list))
                 solution: Program = self.make_solution(
                     primaries=primaries,
@@ -354,7 +354,7 @@ class Wallet:
                     coin_announcements={message},
                     coin_announcements_to_assert=announcements_to_consume,
                 )
-                primary_announcement_hash = Announcement(coin.name(), message).name()
+                primary_announcement_hash = Announcement(coin.id(), message).name()
             else:
                 solution = self.make_solution(coin_announcements_to_assert={primary_announcement_hash})
 

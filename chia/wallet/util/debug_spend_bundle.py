@@ -33,7 +33,7 @@ def coin_as_program(coin: Coin) -> Program:
     """
     Convenience function for when putting `coin_info` into a solution.
     """
-    return Program.to([coin.parent_coin_info, coin.puzzle_hash, coin.amount])
+    return Program.to([coin.parent_coin_id, coin.puzzle_hash, coin.amount])
 
 
 def dump_coin(coin: Coin) -> str:
@@ -59,7 +59,7 @@ def debug_spend_bundle(spend_bundle, agg_sig_additional_data=bytes([3] * 32)) ->
         coin = coin_solution.coin
         puzzle_reveal = Program.from_bytes(bytes(coin_solution.puzzle_reveal))
         solution = Program.from_bytes(bytes(coin_solution.solution))
-        coin_name = coin.name()
+        coin_name = coin.id()
 
         if puzzle_reveal.get_tree_hash() != coin_solution.coin.puzzle_hash:
             print("*** BAD PUZZLE REVEAL")
@@ -115,28 +115,28 @@ def debug_spend_bundle(spend_bundle, agg_sig_additional_data=bytes([3] * 32)) ->
     created = set(spend_bundle.additions())
     spent = set(spend_bundle.removals())
 
-    zero_coin_set = set(coin.name() for coin in created if coin.amount == 0)
+    zero_coin_set = set(coin.id() for coin in created if coin.amount == 0)
 
     ephemeral = created.intersection(spent)
     created.difference_update(ephemeral)
     spent.difference_update(ephemeral)
     print()
     print("spent coins")
-    for coin in sorted(spent, key=lambda _: _.name()):
+    for coin in sorted(spent, key=lambda _: _.id()):
         print(f"  {dump_coin(coin)}")
-        print(f"      => spent coin id {coin.name()}")
+        print(f"      => spent coin id {coin.id()}")
     print()
     print("created coins")
-    for coin in sorted(created, key=lambda _: _.name()):
+    for coin in sorted(created, key=lambda _: _.id()):
         print(f"  {dump_coin(coin)}")
-        print(f"      => created coin id {coin.name()}")
+        print(f"      => created coin id {coin.id()}")
 
     if ephemeral:
         print()
         print("ephemeral coins")
-        for coin in sorted(ephemeral, key=lambda _: _.name()):
+        for coin in sorted(ephemeral, key=lambda _: _.id()):
             print(f"  {dump_coin(coin)}")
-            print(f"      => created coin id {coin.name()}")
+            print(f"      => created coin id {coin.id()}")
 
     created_coin_announcement_pairs = [(_, std_hash(b"".join(_)).hex()) for _ in created_coin_announcements]
     if created_coin_announcement_pairs:

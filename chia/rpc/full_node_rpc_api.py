@@ -468,7 +468,7 @@ class FullNodeRpcApi:
             raise ValueError("Spend bundle not in request")
 
         spend_bundle = SpendBundle.from_json_dict(request["spend_bundle"])
-        spend_name = spend_bundle.name()
+        spend_name = spend_bundle.id()
 
         if self.service.mempool_manager.get_spendbundle(spend_name) is not None:
             status = MempoolInclusionStatus.SUCCESS

@@ -444,7 +444,7 @@ class WalletRpcApi:
                 assert did_wallet.did_info.temp_puzhash is not None
                 assert did_wallet.did_info.temp_pubkey is not None
                 my_did = did_wallet.get_my_DID()
-                coin_name = did_wallet.did_info.temp_coin.name().hex()
+                coin_name = did_wallet.did_info.temp_coin.id().hex()
                 coin_list = did_wallet.did_info.temp_coin.as_list()
                 newpuzhash = did_wallet.did_info.temp_puzhash
                 pubkey = did_wallet.did_info.temp_pubkey
@@ -893,7 +893,7 @@ class WalletRpcApi:
             return {"success": True, "wallet_id": wallet_id, "my_did": my_did}
         else:
             coin = coins.pop()
-            return {"success": True, "wallet_id": wallet_id, "my_did": my_did, "coin_id": coin.name()}
+            return {"success": True, "wallet_id": wallet_id, "my_did": my_did, "coin_id": coin.id()}
 
     async def did_get_recovery_list(self, request):
         wallet_id = int(request["wallet_id"])
@@ -971,7 +971,7 @@ class WalletRpcApi:
         wallet_id = int(request["wallet_id"])
         did_wallet: DIDWallet = self.service.wallet_state_manager.wallets[wallet_id]
         my_did = did_wallet.get_my_DID()
-        coin_name = did_wallet.did_info.temp_coin.name().hex()
+        coin_name = did_wallet.did_info.temp_coin.id().hex()
         return {
             "success": True,
             "wallet_id": wallet_id,

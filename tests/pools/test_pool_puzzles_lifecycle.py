@@ -63,7 +63,7 @@ def sign_delegated_puz(del_puz: Program, coin: Coin) -> G2Element:
     )
     return AugSchemeMPL.sign(
         synthetic_secret_key,
-        (del_puz.get_tree_hash() + coin.name() + DEFAULT_CONSTANTS.AGG_SIG_ME_ADDITIONAL_DATA),
+        (del_puz.get_tree_hash() + coin.id() + DEFAULT_CONSTANTS.AGG_SIG_ME_ADDITIONAL_DATA),
     )
 
 
@@ -95,7 +95,7 @@ class TestPoolPuzzles(TestCase):
         )
         DELAY_TIME = uint64(60800)
         DELAY_PH = starting_ph
-        launcher_id = launcher_coin.name()
+        launcher_id = launcher_coin.id()
         relative_lock_height: uint32 = uint32(5000)
         # use a dummy pool state
         pool_state = PoolState(
@@ -270,7 +270,7 @@ class TestPoolPuzzles(TestCase):
             Program.to(
                 [
                     pooling_innerpuz.get_tree_hash(),
-                    non_reward_p2_singleton.name(),
+                    non_reward_p2_singleton.id(),
                 ]
             ),
         )
@@ -303,7 +303,7 @@ class TestPoolPuzzles(TestCase):
         data = Program.to(bytes(target_pool_state)).get_tree_hash()
         sig: G2Element = AugSchemeMPL.sign(
             sk,
-            (data + singleton.name() + DEFAULT_CONSTANTS.AGG_SIG_ME_ADDITIONAL_DATA),
+            (data + singleton.id() + DEFAULT_CONSTANTS.AGG_SIG_ME_ADDITIONAL_DATA),
         )
         # Spend it!
         coin_db.update_coin_store_for_spend_bundle(
@@ -328,7 +328,7 @@ class TestPoolPuzzles(TestCase):
         # sign the serialized target state
         sig = AugSchemeMPL.sign(
             sk,
-            (data + singleton.name() + DEFAULT_CONSTANTS.AGG_SIG_ME_ADDITIONAL_DATA),
+            (data + singleton.id() + DEFAULT_CONSTANTS.AGG_SIG_ME_ADDITIONAL_DATA),
         )
         # Spend it and hope it fails!
         try:
@@ -387,7 +387,7 @@ class TestPoolPuzzles(TestCase):
         data = Program.to([pooling_innerpuz.get_tree_hash(), START_AMOUNT, bytes(pool_state)]).get_tree_hash()
         sig: G2Element = AugSchemeMPL.sign(
             sk,
-            (data + singleton.name() + DEFAULT_CONSTANTS.AGG_SIG_ME_ADDITIONAL_DATA),
+            (data + singleton.id() + DEFAULT_CONSTANTS.AGG_SIG_ME_ADDITIONAL_DATA),
         )
         # Spend it!
         coin_db.update_coin_store_for_spend_bundle(

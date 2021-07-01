@@ -1151,7 +1151,7 @@ class FullNodeAPI:
 
         all_removals_dict: Dict[bytes32, Coin] = {}
         for coin_record in all_removals:
-            all_removals_dict[coin_record.coin.name()] = coin_record.coin
+            all_removals_dict[coin_record.coin.id()] = coin_record.coin
 
         coins_map: List[Tuple[bytes32, Optional[Coin]]] = []
         proofs_map: List[Tuple[bytes32, bytes]] = []
@@ -1257,7 +1257,7 @@ class FullNodeAPI:
             added_coins_records = await self.full_node.coin_store.get_coins_added_at_height(block.height)
             removed_coins_records = await self.full_node.coin_store.get_coins_removed_at_height(block.height)
             added_coins = [record.coin for record in added_coins_records if not record.coinbase]
-            removal_names = [record.coin.name() for record in removed_coins_records]
+            removal_names = [record.coin.id() for record in removed_coins_records]
             header_block = get_block_header(block, added_coins, removal_names)
             header_blocks.append(header_block)
 

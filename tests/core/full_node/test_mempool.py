@@ -214,10 +214,10 @@ class TestMempoolManager:
         return sb
 
     def assert_sb_in_pool(self, node, sb):
-        assert sb == node.full_node.mempool_manager.get_spendbundle(sb.name())
+        assert sb == node.full_node.mempool_manager.get_spendbundle(sb.id())
 
     def assert_sb_not_in_pool(self, node, sb):
-        assert node.full_node.mempool_manager.get_spendbundle(sb.name()) is None
+        assert node.full_node.mempool_manager.get_spendbundle(sb.id()) is None
 
     @pytest.mark.asyncio
     async def test_double_spend_with_higher_fee(self, two_nodes):
@@ -504,7 +504,7 @@ class TestMempoolManager:
         full_node_1, full_node_2, server_1, server_2 = two_nodes
         blocks = await full_node_1.get_all_full_blocks()
         coin = list(blocks[-1].get_included_reward_coins())[0]
-        cvp = ConditionWithArgs(ConditionOpcode.ASSERT_MY_COIN_ID, [coin.name()])
+        cvp = ConditionWithArgs(ConditionOpcode.ASSERT_MY_COIN_ID, [coin.id()])
         dic = {cvp.opcode: [cvp]}
         blocks, spend_bundle1, peer, status, err = await self.condition_tester(two_nodes, dic, coin=coin)
 
@@ -520,7 +520,7 @@ class TestMempoolManager:
         blocks = await full_node_1.get_all_full_blocks()
         coin = list(blocks[-1].get_included_reward_coins())[0]
         # garbage at the end of the argument list is ignored
-        cvp = ConditionWithArgs(ConditionOpcode.ASSERT_MY_COIN_ID, [coin.name(), b"garbage"])
+        cvp = ConditionWithArgs(ConditionOpcode.ASSERT_MY_COIN_ID, [coin.id(), b"garbage"])
         dic = {cvp.opcode: [cvp]}
         blocks, spend_bundle1, peer, status, err = await self.condition_tester(two_nodes, dic, coin=coin)
 
@@ -536,7 +536,7 @@ class TestMempoolManager:
         blocks = await full_node_1.get_all_full_blocks()
         coin = list(blocks[-1].get_included_reward_coins())[0]
         coin_2 = list(blocks[-2].get_included_reward_coins())[0]
-        cvp = ConditionWithArgs(ConditionOpcode.ASSERT_MY_COIN_ID, [coin_2.name()])
+        cvp = ConditionWithArgs(ConditionOpcode.ASSERT_MY_COIN_ID, [coin_2.id()])
         dic = {cvp.opcode: [cvp]}
         blocks, spend_bundle1, peer, status, err = await self.condition_tester(two_nodes, dic, coin=coin)
 
@@ -705,7 +705,7 @@ class TestMempoolManager:
     @pytest.mark.asyncio
     async def test_correct_coin_announcement_consumed(self, two_nodes):
         def test_fun(coin_1: Coin, coin_2: Coin) -> SpendBundle:
-            announce = Announcement(coin_2.name(), b"test")
+            announce = Announcement(coin_2.id(), b"test")
             cvp = ConditionWithArgs(ConditionOpcode.ASSERT_COIN_ANNOUNCEMENT, [announce.name()])
             dic = {cvp.opcode: [cvp]}
 
@@ -727,7 +727,7 @@ class TestMempoolManager:
     @pytest.mark.asyncio
     async def test_coin_announcement_garbage(self, two_nodes):
         def test_fun(coin_1: Coin, coin_2: Coin) -> SpendBundle:
-            announce = Announcement(coin_2.name(), b"test")
+            announce = Announcement(coin_2.id(), b"test")
             # garbage at the end is ignored
             cvp = ConditionWithArgs(ConditionOpcode.ASSERT_COIN_ANNOUNCEMENT, [announce.name(), b"garbage"])
             dic = {cvp.opcode: [cvp]}
@@ -774,7 +774,7 @@ class TestMempoolManager:
         full_node_1, full_node_2, server_1, server_2 = two_nodes
 
         def test_fun(coin_1: Coin, coin_2: Coin):
-            announce = Announcement(coin_2.name(), b"test")
+            announce = Announcement(coin_2.id(), b"test")
             cvp = ConditionWithArgs(ConditionOpcode.ASSERT_COIN_ANNOUNCEMENT, [announce.name()])
             dic = {cvp.opcode: [cvp]}
             # missing arg here
@@ -796,7 +796,7 @@ class TestMempoolManager:
         full_node_1, full_node_2, server_1, server_2 = two_nodes
 
         def test_fun(coin_1: Coin, coin_2: Coin):
-            announce = Announcement(coin_2.name(), bytes([1] * 10000))
+            announce = Announcement(coin_2.id(), bytes([1] * 10000))
 
             cvp = ConditionWithArgs(ConditionOpcode.ASSERT_COIN_ANNOUNCEMENT, [announce.name()])
 
@@ -829,7 +829,7 @@ class TestMempoolManager:
         full_node_1, full_node_2, server_1, server_2 = two_nodes
 
         def test_fun(coin_1: Coin, coin_2: Coin):
-            announce = Announcement(coin_2.name(), b"test")
+            announce = Announcement(coin_2.id(), b"test")
 
             cvp = ConditionWithArgs(ConditionOpcode.ASSERT_COIN_ANNOUNCEMENT, [announce.name()])
 
@@ -858,7 +858,7 @@ class TestMempoolManager:
         full_node_1, full_node_2, server_1, server_2 = two_nodes
 
         def test_fun(coin_1: Coin, coin_2: Coin):
-            announce = Announcement(coin_1.name(), b"test")
+            announce = Announcement(coin_1.id(), b"test")
 
             cvp = ConditionWithArgs(ConditionOpcode.ASSERT_COIN_ANNOUNCEMENT, [announce.name()])
 
@@ -1278,7 +1278,7 @@ class TestMempoolManager:
         full_node_1, full_node_2, server_1, server_2 = two_nodes
         blocks = await full_node_1.get_all_full_blocks()
         coin = list(blocks[-1].get_included_reward_coins())[0]
-        cvp = ConditionWithArgs(ConditionOpcode.ASSERT_MY_PARENT_ID, [coin.parent_coin_info])
+        cvp = ConditionWithArgs(ConditionOpcode.ASSERT_MY_PARENT_ID, [coin.parent_coin_id])
         dic = {cvp.opcode: [cvp]}
         blocks, spend_bundle1, peer, status, err = await self.condition_tester(two_nodes, dic, coin=coin)
 
@@ -1295,7 +1295,7 @@ class TestMempoolManager:
         blocks = await full_node_1.get_all_full_blocks()
         coin = list(blocks[-1].get_included_reward_coins())[0]
         # garbage at the end of the arguments list is allowed but stripped
-        cvp = ConditionWithArgs(ConditionOpcode.ASSERT_MY_PARENT_ID, [coin.parent_coin_info, b"garbage"])
+        cvp = ConditionWithArgs(ConditionOpcode.ASSERT_MY_PARENT_ID, [coin.parent_coin_id, b"garbage"])
         dic = {cvp.opcode: [cvp]}
         blocks, spend_bundle1, peer, status, err = await self.condition_tester(two_nodes, dic, coin=coin)
 
@@ -1327,7 +1327,7 @@ class TestMempoolManager:
         blocks = await full_node_1.get_all_full_blocks()
         coin = list(blocks[-1].get_included_reward_coins())[0]
         coin_2 = list(blocks[-2].get_included_reward_coins())[0]
-        cvp = ConditionWithArgs(ConditionOpcode.ASSERT_MY_PARENT_ID, [coin_2.parent_coin_info])
+        cvp = ConditionWithArgs(ConditionOpcode.ASSERT_MY_PARENT_ID, [coin_2.parent_coin_id])
         dic = {cvp.opcode: [cvp]}
         blocks, spend_bundle1, peer, status, err = await self.condition_tester(two_nodes, dic, coin=coin)
 

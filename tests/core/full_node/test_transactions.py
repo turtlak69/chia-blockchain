@@ -109,19 +109,19 @@ class TestTransactions:
             10,
             full_node_api_0.full_node.mempool_manager.get_spendbundle,
             tx.spend_bundle,
-            tx.name,
+            tx.id,
         )
         await time_out_assert(
             10,
             full_node_api_1.full_node.mempool_manager.get_spendbundle,
             tx.spend_bundle,
-            tx.name,
+            tx.id,
         )
         await time_out_assert(
             10,
             full_node_api_2.full_node.mempool_manager.get_spendbundle,
             tx.spend_bundle,
-            tx.name,
+            tx.id,
         )
 
         # Farm another block
@@ -181,19 +181,19 @@ class TestTransactions:
             10,
             full_node_api_0.full_node.mempool_manager.get_spendbundle,
             tx.spend_bundle,
-            tx.name,
+            tx.id,
         )
         await time_out_assert(
             10,
             full_node_api_1.full_node.mempool_manager.get_spendbundle,
             tx.spend_bundle,
-            tx.name,
+            tx.id,
         )
         await time_out_assert(
             10,
             full_node_api_2.full_node.mempool_manager.get_spendbundle,
             None,
-            tx.name,
+            tx.id,
         )
 
         # make a final connection.
@@ -205,17 +205,17 @@ class TestTransactions:
             10,
             full_node_api_0.full_node.mempool_manager.get_spendbundle,
             tx.spend_bundle,
-            tx.name,
+            tx.id,
         )
         await time_out_assert(
             10,
             full_node_api_1.full_node.mempool_manager.get_spendbundle,
             tx.spend_bundle,
-            tx.name,
+            tx.id,
         )
         await time_out_assert(
             10,
             full_node_api_2.full_node.mempool_manager.get_spendbundle,
             tx.spend_bundle,
-            tx.name,
+            tx.id,
         )

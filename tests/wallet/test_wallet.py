@@ -209,17 +209,17 @@ class TestWalletSimulator:
         tx = await wallet_0.wallet_state_manager.main_wallet.generate_signed_transaction(10, 32 * b"0", 0)
         await wallet_0.wallet_state_manager.main_wallet.push_transaction(tx)
 
-        await time_out_assert_not_none(5, full_node_0.mempool_manager.get_spendbundle, tx.spend_bundle.name())
+        await time_out_assert_not_none(5, full_node_0.mempool_manager.get_spendbundle, tx.spend_bundle.id())
 
         # wallet0 <-> sever1
         await wallet_server_0.start_client(PeerInfo(self_hostname, uint16(server_1._port)), wallet_0.on_connect)
 
-        await time_out_assert_not_none(5, full_node_1.mempool_manager.get_spendbundle, tx.spend_bundle.name())
+        await time_out_assert_not_none(5, full_node_1.mempool_manager.get_spendbundle, tx.spend_bundle.id())
 
         # wallet0 <-> sever2
         await wallet_server_0.start_client(PeerInfo(self_hostname, uint16(server_2._port)), wallet_0.on_connect)
 
-        await time_out_assert_not_none(5, full_node_2.mempool_manager.get_spendbundle, tx.spend_bundle.name())
+        await time_out_assert_not_none(5, full_node_2.mempool_manager.get_spendbundle, tx.spend_bundle.id())
 
     @pytest.mark.asyncio
     async def test_wallet_make_transaction_hop(self, two_wallet_nodes_five_freeze):
@@ -413,7 +413,7 @@ class TestWalletSimulator:
 
         await wallet.push_transaction(tx_split_coins)
         await time_out_assert(
-            15, tx_in_pool, True, full_node_1.full_node.mempool_manager, tx_split_coins.spend_bundle.name()
+            15, tx_in_pool, True, full_node_1.full_node.mempool_manager, tx_split_coins.spend_bundle.id()
         )
         for i in range(0, num_blocks):
             await full_node_1.farm_new_transaction_block(FarmNewBlockProtocol(32 * b"0"))
@@ -508,7 +508,7 @@ class TestWalletSimulator:
         now = uint64(int(time.time()))
         add_list = list(stolen_sb.additions())
         rem_list = list(stolen_sb.removals())
-        name = stolen_sb.name()
+        name = stolen_sb.id()
         stolen_tx = TransactionRecord(
             confirmed_at_height=uint32(0),
             created_at_time=now,
@@ -610,14 +610,14 @@ class TestWalletSimulator:
         removed = tx_record.removals[0]
         added = tx_record.additions[0]
         added_1 = tx_record.additions[1]
-        wallet_coin_record_rem = await wallet_node.wallet_state_manager.coin_store.get_coin_record(removed.name())
+        wallet_coin_record_rem = await wallet_node.wallet_state_manager.coin_store.get_coin_record(removed.id())
         assert wallet_coin_record_rem.spent
 
-        coin_record_full_node = await full_node_api.full_node.coin_store.get_coin_record(removed.name())
+        coin_record_full_node = await full_node_api.full_node.coin_store.get_coin_record(removed.id())
         assert coin_record_full_node.spent
-        add_1_coin_record_full_node = await full_node_api.full_node.coin_store.get_coin_record(added.name())
+        add_1_coin_record_full_node = await full_node_api.full_node.coin_store.get_coin_record(added.id())
         assert add_1_coin_record_full_node is not None
         assert add_1_coin_record_full_node.confirmed_block_index > 0
-        add_2_coin_record_full_node = await full_node_api.full_node.coin_store.get_coin_record(added_1.name())
+        add_2_coin_record_full_node = await full_node_api.full_node.coin_store.get_coin_record(added_1.id())
         assert add_2_coin_record_full_node is not None
         assert add_2_coin_record_full_node.confirmed_block_index > 0

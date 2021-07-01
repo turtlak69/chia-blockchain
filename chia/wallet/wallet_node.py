@@ -825,7 +825,7 @@ class WalletNode:
                 # TODO review all verification
                 name, coin = name_coin
                 if coin is not None:
-                    removals_merkle_set.add_already_hashed(coin.name())
+                    removals_merkle_set.add_already_hashed(coin.id())
             removals_root = removals_merkle_set.get_root()
             if root != removals_root:
                 return False
@@ -850,11 +850,11 @@ class WalletNode:
                         return False
                 else:
                     # Verifies merkle proof of inclusion of coin name
-                    if coins[i][0] != coin.name():
+                    if coins[i][0] != coin.id():
                         return False
                     included = confirm_included_already_hashed(
                         root,
-                        coin.name(),
+                        coin.id(),
                         proofs[i][1],
                     )
                     if included is False:
@@ -863,7 +863,7 @@ class WalletNode:
 
     async def fetch_puzzle_solution(self, peer, height: uint32, coin: Coin) -> CoinSolution:
         solution_response = await peer.request_puzzle_solution(
-            wallet_protocol.RequestPuzzleSolution(coin.name(), height)
+            wallet_protocol.RequestPuzzleSolution(coin.id(), height)
         )
         if solution_response is None or not isinstance(solution_response, wallet_protocol.RespondPuzzleSolution):
             raise ValueError(f"Was not able to obtain solution {solution_response}")
@@ -875,14 +875,14 @@ class WalletNode:
         assert self.wallet_state_manager is not None
         additional_coin_spends: List[CoinSolution] = []
         if len(removed_coins) > 0:
-            removed_coin_ids = set([coin.name() for coin in removed_coins])
+            removed_coin_ids = set([coin.id() for coin in removed_coins])
             all_added_coins = await self.get_additions(peer, block, [], get_all_additions=True)
             assert all_added_coins is not None
             if all_added_coins is not None:
 
                 for coin in all_added_coins:
                     # This searches specifically for a launcher being created, and adds the solution of the launcher
-                    if coin.puzzle_hash == SINGLETON_LAUNCHER_HASH and coin.parent_coin_info in removed_coin_ids:
+                    if coin.puzzle_hash == SINGLETON_LAUNCHER_HASH and coin.parent_coin_id in removed_coin_ids:
                         cs: CoinSolution = await self.fetch_puzzle_solution(peer, block.height, coin)
                         additional_coin_spends.append(cs)
                         # Apply this coin solution, which might add things to interested list
@@ -892,7 +892,7 @@ class WalletNode:
                     peer, block, added_coins, removed_coins, request_all_removals=True
                 )
                 assert all_removed_coins is not None
-                all_removed_coins_dict: Dict[bytes32, Coin] = {coin.name(): coin for coin in all_removed_coins}
+                all_removed_coins_dict: Dict[bytes32, Coin] = {coin.id(): coin for coin in all_removed_coins}
                 keep_searching = True
                 while keep_searching:
                     # This keeps fetching solutions for coins we are interested list, in this block, until

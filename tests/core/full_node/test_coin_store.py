@@ -123,7 +123,7 @@ class TestCoinStore:
 
                     for expected_coin in should_be_included_prev:
                         # Check that the coinbase rewards are added
-                        record = await coin_store.get_coin_record(expected_coin.name())
+                        record = await coin_store.get_coin_record(expected_coin.id())
                         assert record is not None
                         assert not record.spent
                         assert record.coin == expected_coin
@@ -133,7 +133,7 @@ class TestCoinStore:
                         assert record.spent
                     for coin in tx_additions:
                         # Check that the added coins are added
-                        record = await coin_store.get_coin_record(coin.name())
+                        record = await coin_store.get_coin_record(coin.id())
                         assert not record.spent
                         assert coin == record.coin
 
@@ -161,14 +161,14 @@ class TestCoinStore:
                     removals, additions = [], []
                     await coin_store.new_block(block, additions, removals)
                     coins = block.get_included_reward_coins()
-                    records = [await coin_store.get_coin_record(coin.name()) for coin in coins]
+                    records = [await coin_store.get_coin_record(coin.id()) for coin in coins]
 
                     for record in records:
-                        await coin_store._set_spent(record.coin.name(), block.height)
+                        await coin_store._set_spent(record.coin.id(), block.height)
                         with pytest.raises(AssertionError):
-                            await coin_store._set_spent(record.coin.name(), block.height)
+                            await coin_store._set_spent(record.coin.id(), block.height)
 
-                    records = [await coin_store.get_coin_record(coin.name()) for coin in coins]
+                    records = [await coin_store.get_coin_record(coin.id()) for coin in coins]
                     for record in records:
                         assert record.spent
                         assert record.spent_block_index == block.height
@@ -194,14 +194,14 @@ class TestCoinStore:
                     await coin_store.new_block(block, additions, removals)
                     coins = block.get_included_reward_coins()
                     records: List[Optional[CoinRecord]] = [
-                        await coin_store.get_coin_record(coin.name()) for coin in coins
+                        await coin_store.get_coin_record(coin.id()) for coin in coins
                     ]
 
                     for record in records:
-                        await coin_store._set_spent(record.coin.name(), block.height)
+                        await coin_store._set_spent(record.coin.id(), block.height)
 
                     records: List[Optional[CoinRecord]] = [
-                        await coin_store.get_coin_record(coin.name()) for coin in coins
+                        await coin_store.get_coin_record(coin.id()) for coin in coins
                     ]
                     for record in records:
                         assert record.spent
@@ -214,7 +214,7 @@ class TestCoinStore:
                 if block.is_transaction_block():
                     coins = block.get_included_reward_coins()
                     records: List[Optional[CoinRecord]] = [
-                        await coin_store.get_coin_record(coin.name()) for coin in coins
+                        await coin_store.get_coin_record(coin.id()) for coin in coins
                     ]
 
                     if block.height <= reorg_index:
@@ -252,7 +252,7 @@ class TestCoinStore:
                     if block.is_transaction_block():
                         coins = block.get_included_reward_coins()
                         records: List[Optional[CoinRecord]] = [
-                            await coin_store.get_coin_record(coin.name()) for coin in coins
+                            await coin_store.get_coin_record(coin.id()) for coin in coins
                         ]
                         for record in records:
                             assert not record.spent
@@ -275,7 +275,7 @@ class TestCoinStore:
                         if reorg_block.is_transaction_block():
                             coins = reorg_block.get_included_reward_coins()
                             records: List[Optional[CoinRecord]] = [
-                                await coin_store.get_coin_record(coin.name()) for coin in coins
+                                await coin_store.get_coin_record(coin.id()) for coin in coins
                             ]
                             for record in records:
                                 assert not record.spent

@@ -90,7 +90,7 @@ class CoinStore:
 
         ephemeral_db = dict(self._db)
         for coin in spend_bundle.additions():
-            name = coin.name()
+            name = coin.id()
             ephemeral_db[name] = CoinRecord(
                 coin,
                 uint32(now.height),
@@ -103,9 +103,9 @@ class CoinStore:
         for coin_solution, conditions_dict in zip(spend_bundle.coin_solutions, conditions_dicts):  # noqa
             prev_transaction_block_height = now.height
             timestamp = now.seconds
-            coin_record = ephemeral_db.get(coin_solution.coin.name())
+            coin_record = ephemeral_db.get(coin_solution.coin.id())
             if coin_record is None:
-                raise BadSpendBundleError(f"coin not found for id 0x{coin_solution.coin.name().hex()}")  # noqa
+                raise BadSpendBundleError(f"coin not found for id 0x{coin_solution.coin.id().hex()}")  # noqa
             err = mempool_check_conditions_dict(
                 coin_record,
                 coin_announcements,
@@ -133,7 +133,7 @@ class CoinStore:
         for new_coin in additions:
             self._add_coin_entry(new_coin, now)
         for spent_coin in removals:
-            coin_name = spent_coin.name()
+            coin_name = spent_coin.id()
             coin_record = self._db[coin_name]
             self._db[coin_name] = replace(coin_record, spent_block_index=now.height, spent=True)
         return additions, spend_bundle.coin_solutions
@@ -154,7 +154,7 @@ class CoinStore:
                 yield coin_entry.coin
 
     def _add_coin_entry(self, coin: Coin, birthday: CoinTimestamp) -> None:
-        name = coin.name()
+        name = coin.id()
         # assert name not in self._db
         self._db[name] = CoinRecord(
             coin,

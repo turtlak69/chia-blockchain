@@ -1449,7 +1449,7 @@ def get_name_puzzle_conditions_test(generator: BlockGenerator, max_cost: int) ->
             if conditions_dict is None:
                 conditions_dict = {}
             npc_list.append(
-                NPC(spent_coin.name(), spent_coin.puzzle_hash, [(a, b) for a, b in conditions_dict.items()])
+                NPC(spent_coin.id(), spent_coin.puzzle_hash, [(a, b) for a, b in conditions_dict.items()])
             )
         return NPCResult(None, npc_list, uint64(clvm_cost))
     except Exception:
@@ -1605,8 +1605,8 @@ def create_test_foliage(
             tx_additions.append(coin)
             byte_array_tx.append(bytearray(coin.puzzle_hash))
         for coin in removals:
-            tx_removals.append(coin.name())
-            byte_array_tx.append(bytearray(coin.name()))
+            tx_removals.append(coin.id())
+            byte_array_tx.append(bytearray(coin.id()))
 
         bip158: PyBIP158 = PyBIP158(byte_array_tx)
         encoded = bytes(bip158.GetEncoded())

@@ -27,18 +27,18 @@ class TestMerkleSet:
         excl_coin = coins.pop()
 
         for coin in reversed(coins):
-            merkle_set_reverse.add_already_hashed(coin.name())
+            merkle_set_reverse.add_already_hashed(coin.id())
 
         for coin in coins:
-            merkle_set.add_already_hashed(coin.name())
+            merkle_set.add_already_hashed(coin.id())
 
         for coin in coins:
-            result, proof = merkle_set.is_included_already_hashed(coin.name())
+            result, proof = merkle_set.is_included_already_hashed(coin.id())
             assert result is True
-            result_excl, proof_excl = merkle_set.is_included_already_hashed(excl_coin.name())
+            result_excl, proof_excl = merkle_set.is_included_already_hashed(excl_coin.id())
             assert result_excl is False
-            validate_proof = confirm_included_already_hashed(merkle_set.get_root(), coin.name(), proof)
-            validate_proof_excl = confirm_included_already_hashed(merkle_set.get_root(), excl_coin.name(), proof_excl)
+            validate_proof = confirm_included_already_hashed(merkle_set.get_root(), coin.id(), proof)
+            validate_proof_excl = confirm_included_already_hashed(merkle_set.get_root(), excl_coin.id(), proof_excl)
             assert validate_proof is True
             assert validate_proof_excl is False
 

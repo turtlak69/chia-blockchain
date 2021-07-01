@@ -111,7 +111,7 @@ def coin_announcements_for_conditions_dict(
     for cvp in conditions_dict.get(ConditionOpcode.CREATE_COIN_ANNOUNCEMENT, []):
         message = cvp.vars[0]
         assert len(message) <= 1024
-        announcement = Announcement(input_coin.name(), message)
+        announcement = Announcement(input_coin.id(), message)
         output_announcements.add(announcement)
     return output_announcements
 

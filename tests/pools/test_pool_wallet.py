@@ -59,7 +59,7 @@ class TestPoolWallet2:
 
         async with wsm.db_wrapper.lock:
             pw = await PoolWallet.create(
-                wsm, wallet_0, launcher_spend.coin.name(), tx_record.spend_bundle.coin_solutions, h, True
+                wsm, wallet_0, launcher_spend.coin.id(), tx_record.spend_bundle.coin_solutions, h, True
             )
 
         log.warning(await pw.get_current_state())

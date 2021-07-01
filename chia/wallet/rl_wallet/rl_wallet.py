@@ -167,7 +167,7 @@ class RLWallet:
             return False
 
         origin = coins.copy().pop()
-        origin_id = origin.name()
+        origin_id = origin.id()
 
         user_pubkey_bytes = hexstr_to_bytes(user_pubkey)
 
@@ -208,7 +208,7 @@ class RLWallet:
             limit,
             interval,
             origin,
-            origin.name(),
+            origin.id(),
             rl_puzzle_hash,
             True,
         )
@@ -243,7 +243,7 @@ class RLWallet:
             pubkey=self.rl_info.user_pubkey,
             rate_amount=limit,
             interval_time=interval,
-            origin_id=origin.name(),
+            origin_id=origin.id(),
             clawback_pk=admin_pubkey_bytes,
         )
 
@@ -256,7 +256,7 @@ class RLWallet:
             limit,
             interval,
             origin,
-            origin.name(),
+            origin.id(),
             rl_puzzle_hash,
             True,
         )
@@ -466,7 +466,7 @@ class RLWallet:
         self.rl_coin_record = await self._get_rl_coin_record()
         if not self.rl_coin_record:
             return None
-        rl_parent_id = self.rl_coin_record.coin.parent_coin_info
+        rl_parent_id = self.rl_coin_record.coin.parent_coin_id
         if rl_parent_id == self.rl_info.rl_origin_id:
             return self.rl_info.rl_origin
         rl_parent = await self.wallet_state_manager.coin_store.get_coin_record(rl_parent_id)
@@ -502,12 +502,12 @@ class RLWallet:
         )
 
         solution = solution_for_rl(
-            coin.parent_coin_info,
+            coin.parent_coin_id,
             puzzle_hash,
             coin.amount,
             to_puzzlehash,
             amount,
-            rl_parent.parent_coin_info,
+            rl_parent.parent_coin_id,
             rl_parent.amount,
             self.rl_info.interval,
             self.rl_info.limit,
@@ -571,7 +571,7 @@ class RLWallet:
             self.rl_info.user_pubkey,
             self.rl_info.limit,
             self.rl_info.interval,
-            self.rl_info.rl_origin.name(),
+            self.rl_info.rl_origin.id(),
             self.rl_info.admin_pubkey,
         )
         solution = make_clawback_solution(clawback_puzzle_hash, clawback_coin.amount, fee)
@@ -648,13 +648,13 @@ class RLWallet:
 
         solution = rl_make_solution_mode_2(
             rl_coin.puzzle_hash,
-            consolidating_coin.parent_coin_info,
+            consolidating_coin.parent_coin_id,
             consolidating_coin.puzzle_hash,
             consolidating_coin.amount,
-            rl_coin.parent_coin_info,
+            rl_coin.parent_coin_id,
             rl_coin.amount,
             rl_parent.amount,
-            rl_parent.parent_coin_info,
+            rl_parent.parent_coin_id,
         )
         signature = AugSchemeMPL.sign(secretkey, solution.get_tree_hash())
         rl_spend = CoinSolution(self.rl_coin_record.coin, puzzle, solution)
@@ -664,8 +664,8 @@ class RLWallet:
         # Spend consolidating coin
         puzzle = rl_make_aggregation_puzzle(self.rl_coin_record.coin.puzzle_hash)
         solution = rl_make_aggregation_solution(
-            consolidating_coin.name(),
-            self.rl_coin_record.coin.parent_coin_info,
+            consolidating_coin.id(),
+            self.rl_coin_record.coin.parent_coin_id,
             self.rl_coin_record.coin.amount,
         )
         agg_spend = CoinSolution(consolidating_coin, puzzle, solution)

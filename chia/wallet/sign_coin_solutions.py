@@ -29,7 +29,7 @@ async def sign_coin_solutions(
 
         # Create signature
         for pk, msg in pkm_pairs_for_conditions_dict(
-            conditions_dict, bytes(coin_solution.coin.name()), additional_data
+            conditions_dict, bytes(coin_solution.coin.id()), additional_data
         ):
             pk_list.append(pk)
             msg_list.append(msg)

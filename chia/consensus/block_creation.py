@@ -186,8 +186,8 @@ def create_foliage(
             tx_additions.append(coin)
             byte_array_tx.append(bytearray(coin.puzzle_hash))
         for coin in removals:
-            tx_removals.append(coin.name())
-            byte_array_tx.append(bytearray(coin.name()))
+            tx_removals.append(coin.id())
+            byte_array_tx.append(bytearray(coin.id()))
 
         bip158: PyBIP158 = PyBIP158(byte_array_tx)
         encoded = bytes(bip158.GetEncoded())

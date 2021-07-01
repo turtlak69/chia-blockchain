@@ -57,7 +57,7 @@ def lineage_proof_for_cc_parent(parent_coin: Coin, parent_inner_puzzle_hash: byt
     return Program.to(
         (
             1,
-            [parent_coin.parent_coin_info, parent_inner_puzzle_hash, parent_coin.amount],
+            [parent_coin.parent_coin_id, parent_inner_puzzle_hash, parent_coin.amount],
         )
     )
 
@@ -87,7 +87,7 @@ def coin_solution_for_lock_coin(
     coin: Coin,
 ) -> CoinSolution:
     puzzle_reveal = LOCK_INNER_PUZZLE.curry(prev_coin.as_list(), subtotal)
-    coin = Coin(coin.name(), puzzle_reveal.get_tree_hash(), uint64(0))
+    coin = Coin(coin.id(), puzzle_reveal.get_tree_hash(), uint64(0))
     coin_solution = CoinSolution(coin, puzzle_reveal, Program.to(0))
     return coin_solution
 

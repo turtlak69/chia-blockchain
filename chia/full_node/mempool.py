@@ -44,9 +44,9 @@ class Mempool:
         removals: List[Coin] = item.spend_bundle.removals()
         additions: List[Coin] = item.spend_bundle.additions()
         for rem in removals:
-            del self.removals[rem.name()]
+            del self.removals[rem.id()]
         for add in additions:
-            del self.additions[add.name()]
+            del self.additions[add.id()]
         del self.spends[item.name]
         del self.sorted_spends[item.fee_per_cost][item.name]
         dic = self.sorted_spends[item.fee_per_cost]
@@ -80,7 +80,7 @@ class Mempool:
         self.sorted_spends[item.fee_per_cost][item.name] = item
 
         for add in additions:
-            self.additions[add.name()] = item
+            self.additions[add.id()] = item
         for key in removals_dic.keys():
             self.removals[key] = item
         self.total_mempool_cost += item.cost

@@ -224,9 +224,9 @@ class SingletonWallet:
 
     def update_state(self, puzzle_db: PuzzleDB, removals: List[CoinSpend]) -> int:
         state_change_count = 0
-        current_coin_name = self.current_state.name()
+        current_coin_name = self.current_state.id()
         for coin_spend in removals:
-            if coin_spend.coin.name() == current_coin_name:
+            if coin_spend.coin.id() == current_coin_name:
                 for coin in coin_spend.additions():
                     if coin.amount & 1 == 1:
                         parent_puzzle_hash = coin_spend.coin.puzzle_hash
@@ -236,7 +236,7 @@ class SingletonWallet:
                         assert parent_inner_puzzle is not None
                         parent_inner_puzzle_hash = parent_inner_puzzle.get_tree_hash()
                         lineage_proof = Program.to(
-                            [self.current_state.parent_coin_info, parent_inner_puzzle_hash, coin.amount]
+                            [self.current_state.parent_coin_id, parent_inner_puzzle_hash, coin.amount]
                         )
                         self.lineage_proof = lineage_proof
                         self.current_state = coin
@@ -269,11 +269,11 @@ def launcher_conditions_and_spend_bundle(
     puzzle_db.add_puzzle(launcher_puzzle)
     launcher_puzzle_hash = launcher_puzzle.get_tree_hash()
     launcher_coin = Coin(parent_coin_id, launcher_puzzle_hash, launcher_amount)
-    singleton_full_puzzle = singleton_puzzle(launcher_coin.name(), launcher_puzzle_hash, initial_singleton_inner_puzzle)
+    singleton_full_puzzle = singleton_puzzle(launcher_coin.id(), launcher_puzzle_hash, initial_singleton_inner_puzzle)
     puzzle_db.add_puzzle(singleton_full_puzzle)
     singleton_full_puzzle_hash = singleton_full_puzzle.get_tree_hash()
     message_program = Program.to([singleton_full_puzzle_hash, launcher_amount, metadata])
-    expected_announcement = Announcement(launcher_coin.name(), message_program.get_tree_hash())
+    expected_announcement = Announcement(launcher_coin.id(), message_program.get_tree_hash())
     expected_conditions = []
     expected_conditions.append(
         Program.to(
@@ -294,7 +294,7 @@ def launcher_conditions_and_spend_bundle(
     )
     coin_spend = CoinSpend(launcher_coin, SerializedProgram.from_program(launcher_puzzle), solution)
     spend_bundle = SpendBundle([coin_spend], G2Element())
-    return launcher_coin.name(), expected_conditions, spend_bundle
+    return launcher_coin.id(), expected_conditions, spend_bundle
 
 
 def singleton_puzzle(launcher_id: Program, launcher_puzzle_hash: bytes32, inner_puzzle: Program) -> Program:
@@ -343,7 +343,7 @@ def claim_p2_singleton(
     inner_puzzle_hash = inner_puzzle.get_tree_hash()
     p2_singleton_puzzle = puzzle_db.puzzle_for_hash(p2_singleton_coin.puzzle_hash)
     assert p2_singleton_puzzle is not None
-    p2_singleton_coin_name = p2_singleton_coin.name()
+    p2_singleton_coin_name = p2_singleton_coin.id()
     p2_singleton_solution = solve_puzzle(
         puzzle_db,
         p2_singleton_puzzle,
@@ -368,7 +368,7 @@ def claim_p2_singleton(
 def lineage_proof_for_coin_spend(coin_spend: CoinSpend) -> Program:
     """Take a coin solution, return a lineage proof for their child to use in spends"""
     coin = coin_spend.coin
-    parent_name = coin.parent_coin_info
+    parent_name = coin.parent_coin_id
     amount = coin.amount
 
     inner_puzzle_hash = None
@@ -388,7 +388,7 @@ def create_throwaway_pubkey(seed: bytes) -> G1Element:
 
 
 def assert_coin_spent(coin_store: CoinStore, coin: Coin, is_spent=True):
-    coin_record = coin_store.coin_record(coin.name())
+    coin_record = coin_store.coin_record(coin.id())
     assert coin_record is not None
     assert coin_record.spent is is_spent
 
@@ -410,7 +410,7 @@ def spend_coin_to_singleton(
     launcher_puzzle_hash = launcher_puzzle.get_tree_hash()
     initial_singleton_puzzle = adaptor_for_singleton_inner_puzzle(ANYONE_CAN_SPEND_PUZZLE)
     launcher_id, condition_list, launcher_spend_bundle = launcher_conditions_and_spend_bundle(
-        puzzle_db, farmed_coin.name(), launcher_amount, initial_singleton_puzzle, metadata, launcher_puzzle
+        puzzle_db, farmed_coin.id(), launcher_amount, initial_singleton_puzzle, metadata, launcher_puzzle
     )
 
     conditions = Program.to(condition_list)
@@ -426,7 +426,7 @@ def spend_coin_to_singleton(
 
     singleton_expected_puzzle = singleton_puzzle(launcher_id, launcher_puzzle_hash, initial_singleton_puzzle)
     singleton_expected_puzzle_hash = singleton_expected_puzzle.get_tree_hash()
-    expected_singleton_coin = Coin(launcher_coin.name(), singleton_expected_puzzle_hash, launcher_amount)
+    expected_singleton_coin = Coin(launcher_coin.id(), singleton_expected_puzzle_hash, launcher_amount)
     assert_coin_spent(coin_store, expected_singleton_coin, is_spent=False)
 
     return additions, removals
@@ -442,7 +442,7 @@ def find_interesting_singletons(puzzle_db: PuzzleDB, removals: List[CoinSpend]) 
             eve_coin = coin_spend.additions()[0]
 
             lineage_proof = lineage_proof_for_coin_spend(coin_spend)
-            launcher_id = coin_spend.coin.name()
+            launcher_id = coin_spend.coin.id()
             singleton = SingletonWallet(
                 launcher_id,
                 coin_spend.coin.puzzle_hash,

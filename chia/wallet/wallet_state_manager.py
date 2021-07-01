@@ -548,7 +548,7 @@ class WalletStateManager:
         for record in unconfirmed_tx:
             for coin in record.additions:
                 if await self.is_addition_relevant(coin):
-                    additions[coin.name()] = coin
+                    additions[coin.id()] = coin
         return additions
 
     async def unconfirmed_removals_for_wallet(self, wallet_id: int) -> Dict[bytes32, Coin]:
@@ -559,7 +559,7 @@ class WalletStateManager:
         unconfirmed_tx = await self.tx_store.get_unconfirmed_for_wallet(wallet_id)
         for record in unconfirmed_tx:
             for coin in record.removals:
-                removals[coin.name()] = coin
+                removals[coin.id()] = coin
         return removals
 
     async def new_transaction_block_callback(
@@ -585,7 +585,7 @@ class WalletStateManager:
                     for wallet_id, wallet in self.wallets.items():
                         if (
                             wallet.type() == WalletType.POOLING_WALLET
-                            and (await wallet.get_current_state()).launcher_id == cs.coin.name()
+                            and (await wallet.get_current_state()).launcher_id == cs.coin.id()
                         ):
                             self.log.warning("Already have, not recreating")
                             already_have = True
@@ -597,7 +597,7 @@ class WalletStateManager:
                             continue
                         self.log.info("Found created launcher. Creating pool wallet")
                         pool_wallet = await PoolWallet.create(
-                            self, self.main_wallet, cs.coin.name(), additional_coin_spends, height, True, "pool_wallet"
+                            self, self.main_wallet, cs.coin.id(), additional_coin_spends, height, True, "pool_wallet"
                         )
                         created_pool_wallet_ids.append(pool_wallet.wallet_id)
 
@@ -673,14 +673,14 @@ class WalletStateManager:
             )
 
         for coin in coins:
-            if coin.name() in trade_additions:
+            if coin.id() in trade_additions:
                 trade_adds.append(coin)
 
             is_coinbase = False
             is_fee_reward = False
-            if coin.parent_coin_info in pool_rewards:
+            if coin.parent_coin_id in pool_rewards:
                 is_coinbase = True
-            if coin.parent_coin_info in farmer_rewards:
+            if coin.parent_coin_id in farmer_rewards:
                 is_fee_reward = True
 
             info = await self.puzzle_store.wallet_info_for_puzzle_hash(coin.puzzle_hash)
@@ -735,16 +735,16 @@ class WalletStateManager:
         removed = []
         all_unconfirmed: List[TransactionRecord] = await self.tx_store.get_all_unconfirmed()
         for coin in coins:
-            record = await self.coin_store.get_coin_record(coin.name())
-            if coin.name() in trade_removals:
+            record = await self.coin_store.get_coin_record(coin.id())
+            if coin.id() in trade_removals:
                 trade_coin_removed.append(coin)
             if record is None:
-                self.log.info(f"Record for removed coin {coin.name()} is None. (ephemeral)")
+                self.log.info(f"Record for removed coin {coin.id()} is None. (ephemeral)")
             else:
-                await self.coin_store.set_spent(coin.name(), height)
+                await self.coin_store.set_spent(coin.id(), height)
             for unconfirmed_record in all_unconfirmed:
                 for rem_coin in unconfirmed_record.removals:
-                    if rem_coin.name() == coin.name():
+                    if rem_coin.id() == coin.id():
                         self.log.info(f"Setting tx_id: {unconfirmed_record.name} to confirmed")
                         await self.tx_store.set_confirmed(unconfirmed_record.name, height)
             if record is not None:
@@ -789,14 +789,14 @@ class WalletStateManager:
                 sent_to=[],
                 trade_id=None,
                 type=uint32(tx_type),
-                name=coin.name(),
+                name=coin.id(),
             )
             await self.tx_store.add_transaction_record(tx_record, True)
         else:
             records: List[TransactionRecord] = []
             for record in all_outgoing_transaction_records:
                 for add_coin in record.additions:
-                    if add_coin.name() == coin.name():
+                    if add_coin.id() == coin.id():
                         records.append(record)
 
             if len(records) > 0:
@@ -821,7 +821,7 @@ class WalletStateManager:
                     sent_to=[],
                     trade_id=None,
                     type=uint32(TransactionType.INCOMING_TX.value),
-                    name=coin.name(),
+                    name=coin.id(),
                 )
                 if coin.amount > 0:
                     await self.tx_store.add_transaction_record(tx_record, True)
@@ -930,7 +930,7 @@ class WalletStateManager:
             # For each block, process additions to get all Coins, then process removals to get unspent coins
             for reorg_block in reorg_blocks:
                 for addition in reorg_block.additions:
-                    unspent_coin_names.add(addition.name())
+                    unspent_coin_names.add(addition.id())
                 for removal in reorg_block.removals:
                     record = await self.puzzle_store.get_derivation_record_for_puzzle_hash(removal.puzzle_hash)
                     if record is None:
@@ -947,8 +947,8 @@ class WalletStateManager:
             trade_additions,
         ) = await self.trade_manager.get_coins_of_interest()
         for name, trade_coin in trade_removals.items():
-            if tx_filter.Match(bytearray(trade_coin.name())):
-                removals_of_interest.append(trade_coin.name())
+            if tx_filter.Match(bytearray(trade_coin.id())):
+                removals_of_interest.append(trade_coin.id())
 
         for name, trade_coin in trade_additions.items():
             if tx_filter.Match(bytearray(trade_coin.puzzle_hash)):
@@ -1150,16 +1150,16 @@ class WalletStateManager:
             for coin in tx.removals:
                 # TODO, "if" might not be necessary once unconfirmed tx doesn't contain coins for other wallets
                 if await self.does_coin_belong_to_wallet(coin, wallet_id):
-                    removal_dict[coin.name()] = coin
+                    removal_dict[coin.id()] = coin
 
         # Coins that are part of the trade
         offer_locked_coins: Dict[bytes32, WalletCoinRecord] = await self.trade_manager.get_locked_coins()
 
         filtered = set()
         for record in records:
-            if record.coin.name() in offer_locked_coins:
+            if record.coin.id() in offer_locked_coins:
                 continue
-            if record.coin.name() in removal_dict:
+            if record.coin.id() in removal_dict:
                 continue
             filtered.add(record)
 

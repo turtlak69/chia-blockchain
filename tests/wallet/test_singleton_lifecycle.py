@@ -56,11 +56,11 @@ def launcher_conditions_and_spend_bundle(
     launcher_puzzle_hash = launcher_puzzle.get_tree_hash()
     launcher_coin = Coin(parent_coin_id, launcher_puzzle_hash, launcher_amount)
     singleton_full_puzzle = SINGLETON_MOD.curry(
-        SINGLETON_MOD_HASH, launcher_coin.name(), launcher_puzzle_hash, initial_singleton_inner_puzzle
+        SINGLETON_MOD_HASH, launcher_coin.id(), launcher_puzzle_hash, initial_singleton_inner_puzzle
     )
     singleton_full_puzzle_hash = singleton_full_puzzle.get_tree_hash()
     message_program = Program.to([singleton_full_puzzle_hash, launcher_amount, metadata])
-    expected_announcement = Announcement(launcher_coin.name(), message_program.get_tree_hash())
+    expected_announcement = Announcement(launcher_coin.id(), message_program.get_tree_hash())
     expected_conditions = []
     expected_conditions.append(
         Program.to(
@@ -76,7 +76,7 @@ def launcher_conditions_and_spend_bundle(
     coin_solution = CoinSolution(launcher_coin, launcher_puzzle, launcher_solution)
     spend_bundle = SpendBundle([coin_solution], G2Element())
     lineage_proof = Program.to([parent_coin_id, launcher_amount])
-    return lineage_proof, launcher_coin.name(), expected_conditions, spend_bundle
+    return lineage_proof, launcher_coin.id(), expected_conditions, spend_bundle
 
 
 def singleton_puzzle(launcher_id: Program, launcher_puzzle_hash: bytes32, inner_puzzle: Program) -> Program:
@@ -110,7 +110,7 @@ def test_only_odd_coins_0():
     launcher_puzzle_hash = launcher_puzzle.get_tree_hash()
     initial_singleton_puzzle = adaptor_for_singleton_inner_puzzle(ANYONE_CAN_SPEND_PUZZLE)
     lineage_proof, launcher_id, condition_list, launcher_spend_bundle = launcher_conditions_and_spend_bundle(
-        farmed_coin.name(), launcher_amount, initial_singleton_puzzle, metadata, launcher_puzzle
+        farmed_coin.id(), launcher_amount, initial_singleton_puzzle, metadata, launcher_puzzle
     )
 
     conditions = Program.to(condition_list)
@@ -131,7 +131,7 @@ def test_only_odd_coins_0():
     # breakpoint()
 
     singleton_expected_puzzle_hash = singleton_puzzle_hash(launcher_id, launcher_puzzle_hash, initial_singleton_puzzle)
-    expected_singleton_coin = Coin(launcher_coin.name(), singleton_expected_puzzle_hash, launcher_amount)
+    expected_singleton_coin = Coin(launcher_coin.id(), singleton_expected_puzzle_hash, launcher_amount)
     assert expected_singleton_coin in coin_set_added
 
     # next up: spend the expected_singleton_coin

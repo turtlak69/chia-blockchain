@@ -290,11 +290,11 @@ class CCWallet:
         search_for_parent: bool = True
 
         inner_puzzle = await self.inner_puzzle_for_cc_puzhash(coin.puzzle_hash)
-        lineage_proof = Program.to((1, [coin.parent_coin_info, inner_puzzle.get_tree_hash(), coin.amount]))
-        await self.add_lineage(coin.name(), lineage_proof, True)
+        lineage_proof = Program.to((1, [coin.parent_coin_id, inner_puzzle.get_tree_hash(), coin.amount]))
+        await self.add_lineage(coin.id(), lineage_proof, True)
 
         for name, lineage_proofs in self.cc_info.lineage_proofs:
-            if coin.parent_coin_info == name:
+            if coin.parent_coin_id == name:
                 search_for_parent = False
                 break
 
@@ -304,8 +304,8 @@ class CCWallet:
                     "action_data": {
                         "api_name": "request_puzzle_solution",
                         "height": height,
-                        "coin_name": coin.parent_coin_info,
-                        "received_coin": coin.name(),
+                        "coin_name": coin.parent_coin_id,
+                        "received_coin": coin.id(),
                     }
                 }
             }
@@ -340,7 +340,7 @@ class CCWallet:
             self.log.info(f"parent: {coin_name} inner_puzzle for parent is {inner_puzzle}")
             parent_coin = None
             for coin in removals:
-                if coin.name() == coin_name:
+                if coin.id() == coin_name:
                     parent_coin = coin
             if parent_coin is None:
                 raise ValueError("Error in finding parent")
@@ -381,7 +381,7 @@ class CCWallet:
         assert coins != set()
 
         origin = coins.copy().pop()
-        origin_id = origin.name()
+        origin_id = origin.id()
 
         cc_inner = await self.get_new_inner_hash()
         cc_puzzle_hash: Program = cc_puzzle_hash_for_inner_puzzle_hash(
@@ -399,15 +399,15 @@ class CCWallet:
         eve_coin = Coin(origin_id, cc_puzzle_hash, uint64(0))
 
         await self.add_lineage(
-            eve_coin.name(),
+            eve_coin.id(),
             Program.to(
                 (
                     1,
-                    [eve_coin.parent_coin_info, cc_inner, eve_coin.amount],
+                    [eve_coin.parent_coin_id, cc_inner, eve_coin.amount],
                 )
             ),
         )
-        await self.add_lineage(eve_coin.parent_coin_info, Program.to((0, [origin.as_list(), 1])))
+        await self.add_lineage(eve_coin.parent_coin_id, Program.to((0, [origin.as_list(), 1])))
 
         if send:
             regular_record = TransactionRecord(
@@ -466,7 +466,7 @@ class CCWallet:
             our_spend = False
             for coin in record.removals:
                 # Don't count eve spend as change
-                if coin.parent_coin_info.hex() == self.get_colour():
+                if coin.parent_coin_id.hex() == self.get_colour():
                     continue
                 if await self.wallet_state_manager.does_coin_belong_to_wallet(coin, self.id()):
                     our_spend = True
@@ -525,11 +525,11 @@ class CCWallet:
         for coinrecord in spendable:
             if sum >= amount and len(used_coins) > 0:
                 break
-            if coinrecord.coin.name() in unconfirmed_removals:
+            if coinrecord.coin.id() in unconfirmed_removals:
                 continue
             sum += coinrecord.coin.amount
             used_coins.add(coinrecord.coin)
-            self.log.info(f"Selected coin: {coinrecord.coin.name()} at height {coinrecord.confirmed_block_height}!")
+            self.log.info(f"Selected coin: {coinrecord.coin.id()} at height {coinrecord.confirmed_block_height}!")
 
         # This happens when we couldn't use one of the coins because it's already used
         # but unconfirmed, and we are waiting for the change. (unconfirmed_additions)
@@ -566,7 +566,7 @@ class CCWallet:
 
     async def get_lineage_proof_for_coin(self, coin) -> Optional[Program]:
         for name, proof in self.cc_info.lineage_proofs:
-            if name == coin.parent_coin_info:
+            if name == coin.parent_coin_id:
                 return proof
         return None
 
@@ -629,7 +629,7 @@ class CCWallet:
             lineage_proof = await self.get_lineage_proof_for_coin(coin)
             assert lineage_proof is not None
             spendable_cc_list.append(SpendableCC(coin, genesis_id, inner_puzzle, lineage_proof))
-            sigs = sigs + await self.get_sigs(coin_inner_puzzle, innersol, coin.name())
+            sigs = sigs + await self.get_sigs(coin_inner_puzzle, innersol, coin.id())
 
         spend_bundle = spend_bundle_for_spendable_ccs(
             CC_MOD,
@@ -676,7 +676,7 @@ class CCWallet:
         coins = await self.standard_wallet.select_coins(amount)
 
         origin = coins.copy().pop()
-        origin_id = origin.name()
+        origin_id = origin.id()
 
         cc_inner_hash = await self.get_new_inner_hash()
         await self.add_lineage(origin_id, Program.to((0, [origin.as_list(), 0])))
@@ -725,9 +725,9 @@ class CCWallet:
                 )
                 output_created = coin
             else:
-                innersol = self.standard_wallet.make_solution(consumed=[output_created.name()])
+                innersol = self.standard_wallet.make_solution(consumed=[output_created.id()])
             innerpuz: Program = await self.inner_puzzle_for_cc_puzhash(coin.puzzle_hash)
-            sigs = sigs + await self.get_sigs(innerpuz, innersol, coin.name())
+            sigs = sigs + await self.get_sigs(innerpuz, innersol, coin.id())
             lineage_proof = await self.get_lineage_proof_for_coin(coin)
             puzzle_reveal = cc_puzzle_for_inner_puzzle(CC_MOD, self.cc_info.my_genesis_checker, innerpuz)
             # Use coin info to create solution and add coin and solution to list of CoinSolutions

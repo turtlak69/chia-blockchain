@@ -105,7 +105,7 @@ class TestWalletRpc:
 
             # Tests sending a basic transaction
             tx = await client.send_transaction("1", tx_amount, addr)
-            transaction_id = tx.name
+            transaction_id = tx.id
 
             async def tx_in_mempool():
                 tx = await client.get_transaction("1", transaction_id)
@@ -216,7 +216,7 @@ class TestWalletRpc:
             created_tx = await client.send_transaction("1", tx_amount, addr)
 
             async def tx_in_mempool_2():
-                tx = await client.get_transaction("1", created_tx.name)
+                tx = await client.get_transaction("1", created_tx.id)
                 return tx.is_in_mempool()
 
             await time_out_assert(5, tx_in_mempool_2, True)

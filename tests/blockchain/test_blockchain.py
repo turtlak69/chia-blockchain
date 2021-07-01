@@ -2325,9 +2325,9 @@ class TestBodyValidation:
             assert e is None
 
         # ephemeral coin is spent
-        first_coin = await b.coin_store.get_coin_record(new_coin.name())
+        first_coin = await b.coin_store.get_coin_record(new_coin.id())
         assert first_coin is not None and first_coin.spent
-        second_coin = await b.coin_store.get_coin_record(tx_2.additions()[0].name())
+        second_coin = await b.coin_store.get_coin_record(tx_2.additions()[0].id())
         assert second_coin is not None and not second_coin.spent
 
         farmer_coin = create_farmer_coin(
@@ -2343,7 +2343,7 @@ class TestBodyValidation:
         )
         assert (await b.receive_block(blocks_reorg[-1]))[1] is None
 
-        farmer_coin = await b.coin_store.get_coin_record(farmer_coin.name())
+        farmer_coin = await b.coin_store.get_coin_record(farmer_coin.id())
         assert first_coin is not None and farmer_coin.spent
 
     @pytest.mark.asyncio

@@ -42,8 +42,8 @@ def mempool_assert_my_coin_id(condition: ConditionWithArgs, unspent: CoinRecord)
     """
     Checks if CoinID matches the id from the condition
     """
-    if unspent.coin.name() != condition.vars[0]:
-        log.warning(f"My name: {unspent.coin.name()} got: {condition.vars[0].hex()}")
+    if unspent.coin.id() != condition.vars[0]:
+        log.warning(f"My name: {unspent.coin.id()} got: {condition.vars[0].hex()}")
         return Err.ASSERT_MY_COIN_ID_FAILED
     return None
 
@@ -117,7 +117,7 @@ def mempool_assert_my_parent_id(condition: ConditionWithArgs, unspent: CoinRecor
     """
     Checks if coin's parent ID matches the ID from the condition
     """
-    if unspent.coin.parent_coin_info != condition.vars[0]:
+    if unspent.coin.parent_coin_id != condition.vars[0]:
         return Err.ASSERT_MY_PARENT_ID_FAILED
     return None
 
@@ -341,7 +341,7 @@ def get_name_puzzle_conditions(
             if conditions_dict is None:
                 conditions_dict = {}
             npc_list.append(
-                NPC(spent_coin.name(), spent_coin.puzzle_hash, [(a, b) for a, b in conditions_dict.items()])
+                NPC(spent_coin.id(), spent_coin.puzzle_hash, [(a, b) for a, b in conditions_dict.items()])
             )
         return NPCResult(None, npc_list, uint64(clvm_cost))
     except ValidationError as e:

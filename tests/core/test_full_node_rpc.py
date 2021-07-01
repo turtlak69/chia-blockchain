@@ -160,11 +160,11 @@ class TestRpc:
                 )
                 == spend_bundle
             )
-            assert (await client.get_coin_record_by_name(coin.name())) is None
+            assert (await client.get_coin_record_by_name(coin.id())) is None
 
             await full_node_api_1.farm_new_transaction_block(FarmNewBlockProtocol(ph_2))
 
-            assert (await client.get_coin_record_by_name(coin.name())).coin == coin
+            assert (await client.get_coin_record_by_name(coin.id())).coin == coin
 
             assert len(await client.get_coin_records_by_puzzle_hash(ph_receiver)) == 1
             assert len(list(filter(lambda cr: not cr.spent, (await client.get_coin_records_by_puzzle_hash(ph))))) == 3

@@ -125,14 +125,14 @@ class WalletTool:
             pubkey = secret_key.get_g1()
             puzzle = puzzle_for_pk(bytes(pubkey))
             if n == 0:
-                message_list = [c.name() for c in coins]
+                message_list = [c.id() for c in coins]
                 for outputs in condition_dic[ConditionOpcode.CREATE_COIN]:
-                    message_list.append(Coin(coin.name(), outputs.vars[0], int_from_bytes(outputs.vars[1])).name())
+                    message_list.append(Coin(coin.id(), outputs.vars[0], int_from_bytes(outputs.vars[1])).id())
                 message = std_hash(b"".join(message_list))
                 condition_dic[ConditionOpcode.CREATE_COIN_ANNOUNCEMENT].append(
                     ConditionWithArgs(ConditionOpcode.CREATE_COIN_ANNOUNCEMENT, [message])
                 )
-                primary_announcement_hash = Announcement(coin.name(), message).name()
+                primary_announcement_hash = Announcement(coin.id(), message).name()
                 secondary_coins_cond_dic[ConditionOpcode.ASSERT_COIN_ANNOUNCEMENT].append(
                     ConditionWithArgs(ConditionOpcode.ASSERT_COIN_ANNOUNCEMENT, [primary_announcement_hash])
                 )
@@ -157,7 +157,7 @@ class WalletTool:
             conditions_dict = conditions_by_opcode(con)
 
             for _, msg in pkm_pairs_for_conditions_dict(
-                conditions_dict, bytes(coin_solution.coin.name()), self.constants.AGG_SIG_ME_ADDITIONAL_DATA
+                conditions_dict, bytes(coin_solution.coin.id()), self.constants.AGG_SIG_ME_ADDITIONAL_DATA
             ):
                 signature = AugSchemeMPL.sign(synthetic_secret_key, msg)
                 signatures.append(signature)

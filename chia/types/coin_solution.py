@@ -21,4 +21,4 @@ class CoinSolution(Streamable):
     solution: SerializedProgram
 
     def additions(self) -> List[Coin]:
-        return additions_for_solution(self.coin.name(), self.puzzle_reveal, self.solution, INFINITE_COST)
+        return additions_for_solution(self.coin.id(), self.puzzle_reveal, self.solution, INFINITE_COST)

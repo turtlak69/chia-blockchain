@@ -246,7 +246,7 @@ async def validate_block_body(
         # Be careful to check for 64 bit overflows in other languages. This is the max 64 bit unsigned integer
         # We will not even reach here because Coins do type checking (uint64)
         for coin in additions + coinbase_additions:
-            additions_dic[coin.name()] = coin
+            additions_dic[coin.id()] = coin
             if coin.amount < 0:
                 return Err.COIN_AMOUNT_NEGATIVE, None
 
@@ -279,7 +279,7 @@ async def validate_block_body(
             return Err.INVALID_TRANSACTIONS_FILTER_HASH, None
 
         # 13. Check for duplicate outputs in additions
-        addition_counter = collections.Counter(_.name() for _ in additions + coinbase_additions)
+        addition_counter = collections.Counter(_.id() for _ in additions + coinbase_additions)
         for k, v in addition_counter.items():
             if v > 1:
                 return Err.DUPLICATE_OUTPUT, None
@@ -344,14 +344,14 @@ async def validate_block_body(
                     assert c_name not in removals_since_fork
                     removals_since_fork.add(c_name)
                 for c in additions_in_curr:
-                    assert c.name() not in additions_since_fork
+                    assert c.id() not in additions_since_fork
                     assert curr.foliage_transaction_block is not None
-                    additions_since_fork[c.name()] = (c, curr.height, curr.foliage_transaction_block.timestamp)
+                    additions_since_fork[c.id()] = (c, curr.height, curr.foliage_transaction_block.timestamp)
 
                 for coinbase_coin in curr.get_included_reward_coins():
-                    assert coinbase_coin.name() not in additions_since_fork
+                    assert coinbase_coin.id() not in additions_since_fork
                     assert curr.foliage_transaction_block is not None
-                    additions_since_fork[coinbase_coin.name()] = (
+                    additions_since_fork[coinbase_coin.id()] = (
                         coinbase_coin,
                         curr.height,
                         curr.foliage_transaction_block.timestamp,

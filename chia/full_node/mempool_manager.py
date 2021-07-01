@@ -186,8 +186,8 @@ class MempoolManager:
             # All coins spent in all conflicting items must also be spent in
             # the new item
             for coin in item.removals:
-                if coin.name() not in removals:
-                    log.debug(f"Rejecting conflicting tx as it does not spend conflicting coin {coin.name()}")
+                if coin.id() not in removals:
+                    log.debug(f"Rejecting conflicting tx as it does not spend conflicting coin {coin.id()}")
                     return False
 
         # New item must have higher fee per cost
@@ -262,7 +262,7 @@ class MempoolManager:
 
         additions_dict: Dict[bytes32, Coin] = {}
         for add in additions:
-            additions_dict[add.name()] = add
+            additions_dict[add.id()] = add
 
         addition_amount = uint64(0)
         # Check additions for max coin amount
@@ -281,7 +281,7 @@ class MempoolManager:
                 )
             addition_amount = uint64(addition_amount + coin.amount)
         # Check for duplicate outputs
-        addition_counter = collections.Counter(_.name() for _ in additions)
+        addition_counter = collections.Counter(_.id() for _ in additions)
         for k, v in addition_counter.items():
             if v > 1:
                 return None, MempoolInclusionStatus.FAILED, Err.DUPLICATE_OUTPUT
@@ -361,7 +361,7 @@ class MempoolManager:
         conflicting_pool_items: Dict[bytes32, MempoolItem] = {}
         if fail_reason is Err.MEMPOOL_CONFLICT:
             for conflicting in conflicts:
-                sb: MempoolItem = self.mempool.removals[conflicting.name()]
+                sb: MempoolItem = self.mempool.removals[conflicting.id()]
                 conflicting_pool_items[sb.name] = sb
             if not self.can_replace(conflicting_pool_items, removal_record_dict, fees, fees_per_cost):
                 potential = MempoolItem(
@@ -460,7 +460,7 @@ class MempoolManager:
             if record.spent == 1:
                 return Err.DOUBLE_SPEND, []
             # 2. Checks if there's a mempool conflict
-            if removal.name() in self.mempool.removals:
+            if removal.id() in self.mempool.removals:
                 conflicts.append(removal)
 
         if len(conflicts) > 0:

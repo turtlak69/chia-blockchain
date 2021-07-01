@@ -32,12 +32,12 @@ class TestWalletInterestedStore:
             coin_1 = Coin(token_bytes(32), token_bytes(32), uint64(12312))
             coin_2 = Coin(token_bytes(32), token_bytes(32), uint64(12312))
             assert (await store.get_interested_coin_ids()) == []
-            await store.add_interested_coin_id(coin_1.name())
-            assert (await store.get_interested_coin_ids()) == [coin_1.name()]
-            await store.add_interested_coin_id(coin_1.name())
-            assert (await store.get_interested_coin_ids()) == [coin_1.name()]
-            await store.add_interested_coin_id(coin_2.name())
-            assert set(await store.get_interested_coin_ids()) == {coin_1.name(), coin_2.name()}
+            await store.add_interested_coin_id(coin_1.id())
+            assert (await store.get_interested_coin_ids()) == [coin_1.id()]
+            await store.add_interested_coin_id(coin_1.id())
+            assert (await store.get_interested_coin_ids()) == [coin_1.id()]
+            await store.add_interested_coin_id(coin_2.id())
+            assert set(await store.get_interested_coin_ids()) == {coin_1.id(), coin_2.id()}
             puzzle_hash = token_bytes(32)
             assert len(await store.get_interested_puzzle_hashes()) == 0
 

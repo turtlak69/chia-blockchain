@@ -227,7 +227,7 @@ def main():
     mod_code = CC_MOD
 
     def coin_checker_for_farmed_coin_by_coin_id(coin: Coin):
-        return create_genesis_or_zero_coin_checker(coin.name())
+        return create_genesis_or_zero_coin_checker(coin.id())
 
     test_spend_through_n(mod_code, coin_checker_for_farmed_coin_by_coin_id, 12)
     test_spend_zero_coin(mod_code, coin_checker_for_farmed_coin_by_coin_id)

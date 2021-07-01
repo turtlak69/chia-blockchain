@@ -109,7 +109,7 @@ class WalletCoinStore:
                 int(record.spent),
                 int(record.coinbase),
                 str(record.coin.puzzle_hash.hex()),
-                str(record.coin.parent_coin_info.hex()),
+                str(record.coin.parent_coin_id.hex()),
                 bytes(record.coin.amount),
                 record.wallet_type,
                 record.wallet_id,
@@ -231,17 +231,17 @@ class WalletCoinStore:
                     coin_record.wallet_type,
                     coin_record.wallet_id,
                 )
-                self.coin_record_cache[coin_record.coin.name()] = new_record
-                self.unspent_coin_wallet_cache[coin_record.wallet_id][coin_record.coin.name()] = new_record
+                self.coin_record_cache[coin_record.coin.id()] = new_record
+                self.unspent_coin_wallet_cache[coin_record.wallet_id][coin_record.coin.id()] = new_record
             if coin_record.confirmed_block_height > height:
                 delete_queue.append(coin_record)
 
         for coin_record in delete_queue:
-            self.coin_record_cache.pop(coin_record.coin.name())
+            self.coin_record_cache.pop(coin_record.coin.id())
             if coin_record.wallet_id in self.unspent_coin_wallet_cache:
                 coin_cache = self.unspent_coin_wallet_cache[coin_record.wallet_id]
-                if coin_record.coin.name() in coin_cache:
-                    coin_cache.pop(coin_record.coin.name())
+                if coin_record.coin.id() in coin_cache:
+                    coin_cache.pop(coin_record.coin.id())
 
         c1 = await self.db_connection.execute("DELETE FROM coin_record WHERE confirmed_height>?", (height,))
         await c1.close()

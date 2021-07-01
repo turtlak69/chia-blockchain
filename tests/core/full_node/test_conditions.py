@@ -145,7 +145,7 @@ class TestConditions:
     async def test_invalid_my_id(self):
         blocks = initial_blocks()
         coin = list(blocks[-2].get_included_reward_coins())[0]
-        wrong_name = bytearray(coin.name())
+        wrong_name = bytearray(coin.id())
         wrong_name[-1] ^= 1
         conditions = Program.to(assemble(f"(({ConditionOpcode.ASSERT_MY_COIN_ID[0]} 0x{wrong_name.hex()}))"))
         await check_conditions(conditions, expected_err=Err.ASSERT_MY_COIN_ID_FAILED)
@@ -154,7 +154,7 @@ class TestConditions:
     async def test_valid_my_id(self):
         blocks = initial_blocks()
         coin = list(blocks[-2].get_included_reward_coins())[0]
-        conditions = Program.to(assemble(f"(({ConditionOpcode.ASSERT_MY_COIN_ID[0]} 0x{coin.name().hex()}))"))
+        conditions = Program.to(assemble(f"(({ConditionOpcode.ASSERT_MY_COIN_ID[0]} 0x{coin.id().hex()}))"))
         await check_conditions(conditions)
 
     @pytest.mark.asyncio
@@ -175,7 +175,7 @@ class TestConditions:
     async def test_invalid_coin_announcement(self):
         blocks = initial_blocks()
         coin = list(blocks[-2].get_included_reward_coins())[0]
-        announce = Announcement(coin.name(), b"test_bad")
+        announce = Announcement(coin.id(), b"test_bad")
         conditions = Program.to(
             assemble(
                 f"(({ConditionOpcode.CREATE_COIN_ANNOUNCEMENT[0]} 'test')"
@@ -188,7 +188,7 @@ class TestConditions:
     async def test_valid_coin_announcement(self):
         blocks = initial_blocks()
         coin = list(blocks[-2].get_included_reward_coins())[0]
-        announce = Announcement(coin.name(), b"test")
+        announce = Announcement(coin.id(), b"test")
         conditions = Program.to(
             assemble(
                 f"(({ConditionOpcode.CREATE_COIN_ANNOUNCEMENT[0]} 'test')"

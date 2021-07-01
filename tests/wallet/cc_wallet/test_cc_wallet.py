@@ -320,7 +320,7 @@ class TestCCWallet:
         tx_record = await wallet.wallet_state_manager.main_wallet.generate_signed_transaction(10, cc2_ph, 0)
         await wallet.wallet_state_manager.add_pending_transaction(tx_record)
         await time_out_assert(
-            15, tx_in_pool, True, full_node_api.full_node.mempool_manager, tx_record.spend_bundle.name()
+            15, tx_in_pool, True, full_node_api.full_node.mempool_manager, tx_record.spend_bundle.id()
         )
         for i in range(0, num_blocks):
             await full_node_api.farm_new_transaction_block(FarmNewBlockProtocol(32 * b"0"))
@@ -497,11 +497,11 @@ class TestCCWallet:
             spendable = await cc_wallet.get_cc_spendable_coins()
             spendable_name_set = set()
             for record in spendable:
-                spendable_name_set.add(record.coin.name())
+                spendable_name_set.add(record.coin.id())
             puzzle_hash = cc_puzzle_hash_for_inner_puzzle_hash(CC_MOD, cc_wallet.cc_info.my_genesis_checker, cc_2_hash)
             for i in range(1, 50):
-                coin = Coin(spent_coint.name(), puzzle_hash, i)
-                if coin.name() not in spendable_name_set:
+                coin = Coin(spent_coint.id(), puzzle_hash, i)
+                if coin.id() not in spendable_name_set:
                     return False
             return True
 
