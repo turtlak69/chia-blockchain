@@ -183,7 +183,7 @@ class TestFullNodeBlockCompression:
             10,
             full_node_2.full_node.mempool_manager.get_spendbundle,
             tr.spend_bundle,
-            tr.name,
+            tr.id,
         )
 
         # Farm a block
@@ -208,7 +208,7 @@ class TestFullNodeBlockCompression:
             10,
             full_node_2.full_node.mempool_manager.get_spendbundle,
             tr.spend_bundle,
-            tr.name,
+            tr.id,
         )
 
         # Farm a block
@@ -240,7 +240,7 @@ class TestFullNodeBlockCompression:
             10,
             full_node_2.full_node.mempool_manager.get_spendbundle,
             tr.spend_bundle,
-            tr.name,
+            tr.id,
         )
         tr: TransactionRecord = await wallet.generate_signed_transaction(
             40000,
@@ -251,7 +251,7 @@ class TestFullNodeBlockCompression:
             10,
             full_node_2.full_node.mempool_manager.get_spendbundle,
             tr.spend_bundle,
-            tr.name,
+            tr.id,
         )
 
         tr: TransactionRecord = await wallet.generate_signed_transaction(
@@ -263,7 +263,7 @@ class TestFullNodeBlockCompression:
             10,
             full_node_2.full_node.mempool_manager.get_spendbundle,
             tr.spend_bundle,
-            tr.name,
+            tr.id,
         )
 
         tr: TransactionRecord = await wallet.generate_signed_transaction(
@@ -275,7 +275,7 @@ class TestFullNodeBlockCompression:
             10,
             full_node_2.full_node.mempool_manager.get_spendbundle,
             tr.spend_bundle,
-            tr.name,
+            tr.id,
         )
 
         # Farm a block
@@ -310,7 +310,7 @@ class TestFullNodeBlockCompression:
             10,
             full_node_2.full_node.mempool_manager.get_spendbundle,
             tr.spend_bundle,
-            tr.name,
+            tr.id,
         )
 
         # Farm a block
@@ -332,7 +332,7 @@ class TestFullNodeBlockCompression:
             10,
             full_node_2.full_node.mempool_manager.get_spendbundle,
             tr.spend_bundle,
-            tr.name,
+            tr.id,
         )
         # Make a standard transaction
         tr: TransactionRecord = await wallet.generate_signed_transaction(
@@ -344,7 +344,7 @@ class TestFullNodeBlockCompression:
             10,
             full_node_2.full_node.mempool_manager.get_spendbundle,
             tr.spend_bundle,
-            tr.name,
+            tr.id,
         )
 
         # Farm a block

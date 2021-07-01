@@ -571,7 +571,7 @@ class TestWalletSimulator:
 
         tx = await wallet.generate_signed_transaction(1000, ph2, coins={coin})
         await wallet.push_transaction(tx)
-        await full_node_api.full_node.respond_transaction(tx.spend_bundle, tx.name)
+        await full_node_api.full_node.respond_transaction(tx.spend_bundle, tx.id)
         await time_out_assert(5, wallet.get_confirmed_balance, funds)
         for i in range(0, 2):
             await full_node_api.farm_new_transaction_block(FarmNewBlockProtocol(32 * b"0"))
@@ -606,7 +606,7 @@ class TestWalletSimulator:
         await time_out_assert(15, wallet.get_confirmed_balance, funds - 1000)
         unconfirmed = await wallet_node.wallet_state_manager.tx_store.get_unconfirmed_for_wallet(int(wallet.id()))
         assert len(unconfirmed) == 0
-        tx_record = await wallet_node.wallet_state_manager.tx_store.get_transaction_record(tx.name)
+        tx_record = await wallet_node.wallet_state_manager.tx_store.get_transaction_record(tx.id)
         removed = tx_record.removals[0]
         added = tx_record.additions[0]
         added_1 = tx_record.additions[1]

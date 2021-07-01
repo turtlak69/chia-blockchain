@@ -198,11 +198,11 @@ class TestPoolWalletRpc:
             10,
             full_node_api.full_node.mempool_manager.get_spendbundle,
             creation_tx.spend_bundle,
-            creation_tx.name,
+            creation_tx.id,
         )
 
         await self.farm_blocks(full_node_api, our_ph, 6)
-        assert full_node_api.full_node.mempool_manager.get_spendbundle(creation_tx.name) is None
+        assert full_node_api.full_node.mempool_manager.get_spendbundle(creation_tx.id) is None
 
         summaries_response = await client.get_wallets()
         wallet_id: Optional[int] = None
@@ -256,11 +256,11 @@ class TestPoolWalletRpc:
             10,
             full_node_api.full_node.mempool_manager.get_spendbundle,
             creation_tx.spend_bundle,
-            creation_tx.name,
+            creation_tx.id,
         )
 
         await self.farm_blocks(full_node_api, our_ph, 6)
-        assert full_node_api.full_node.mempool_manager.get_spendbundle(creation_tx.name) is None
+        assert full_node_api.full_node.mempool_manager.get_spendbundle(creation_tx.id) is None
 
         summaries_response = await client.get_wallets()
         wallet_id: Optional[int] = None
@@ -319,18 +319,18 @@ class TestPoolWalletRpc:
             10,
             full_node_api.full_node.mempool_manager.get_spendbundle,
             creation_tx.spend_bundle,
-            creation_tx.name,
+            creation_tx.id,
         )
         await time_out_assert(
             10,
             full_node_api.full_node.mempool_manager.get_spendbundle,
             creation_tx_2.spend_bundle,
-            creation_tx_2.name,
+            creation_tx_2.id,
         )
 
         await self.farm_blocks(full_node_api, our_ph_2, 6)
-        assert full_node_api.full_node.mempool_manager.get_spendbundle(creation_tx.name) is None
-        assert full_node_api.full_node.mempool_manager.get_spendbundle(creation_tx_2.name) is None
+        assert full_node_api.full_node.mempool_manager.get_spendbundle(creation_tx.id) is None
+        assert full_node_api.full_node.mempool_manager.get_spendbundle(creation_tx_2.id) is None
 
         await asyncio.sleep(3)
         status_2: PoolWalletInfo = (await client.pw_status(2))[0]
@@ -400,7 +400,7 @@ class TestPoolWalletRpc:
             10,
             full_node_api.full_node.mempool_manager.get_spendbundle,
             creation_tx.spend_bundle,
-            creation_tx.name,
+            creation_tx.id,
         )
         await self.farm_blocks(full_node_api, our_ph, 1)
         await asyncio.sleep(2)
@@ -431,7 +431,7 @@ class TestPoolWalletRpc:
             5,
             full_node_api.full_node.mempool_manager.get_spendbundle,
             absorb_tx.spend_bundle,
-            absorb_tx.name,
+            absorb_tx.id,
         )
         await self.farm_blocks(full_node_api, our_ph, 2)
         await asyncio.sleep(2)
@@ -448,7 +448,7 @@ class TestPoolWalletRpc:
             5,
             full_node_api.full_node.mempool_manager.get_spendbundle,
             absorb_tx.spend_bundle,
-            absorb_tx.name,
+            absorb_tx.id,
         )
 
         await self.farm_blocks(full_node_api, our_ph, 2)
@@ -478,7 +478,7 @@ class TestPoolWalletRpc:
             10,
             full_node_api.full_node.mempool_manager.get_spendbundle,
             creation_tx.spend_bundle,
-            creation_tx.name,
+            creation_tx.id,
         )
         await self.farm_blocks(full_node_api, our_ph, 1)
         await asyncio.sleep(2)
@@ -511,7 +511,7 @@ class TestPoolWalletRpc:
             5,
             full_node_api.full_node.mempool_manager.get_spendbundle,
             absorb_tx.spend_bundle,
-            absorb_tx.name,
+            absorb_tx.id,
         )
         await self.farm_blocks(full_node_api, our_ph, 2)
         await asyncio.sleep(2)
@@ -529,7 +529,7 @@ class TestPoolWalletRpc:
             5,
             full_node_api.full_node.mempool_manager.get_spendbundle,
             absorb_tx.spend_bundle,
-            absorb_tx.name,
+            absorb_tx.id,
         )
 
         await self.farm_blocks(full_node_api, our_ph, 2)
@@ -580,17 +580,17 @@ class TestPoolWalletRpc:
                 10,
                 full_node_api.full_node.mempool_manager.get_spendbundle,
                 creation_tx.spend_bundle,
-                creation_tx.name,
+                creation_tx.id,
             )
             await time_out_assert(
                 10,
                 full_node_api.full_node.mempool_manager.get_spendbundle,
                 creation_tx_2.spend_bundle,
-                creation_tx_2.name,
+                creation_tx_2.id,
             )
 
             await self.farm_blocks(full_node_api, our_ph, 6)
-            assert full_node_api.full_node.mempool_manager.get_spendbundle(creation_tx.name) is None
+            assert full_node_api.full_node.mempool_manager.get_spendbundle(creation_tx.id) is None
 
             summaries_response = await client.get_wallets()
             wallet_id: Optional[int] = None
@@ -682,11 +682,11 @@ class TestPoolWalletRpc:
                 10,
                 full_node_api.full_node.mempool_manager.get_spendbundle,
                 creation_tx.spend_bundle,
-                creation_tx.name,
+                creation_tx.id,
             )
 
             await self.farm_blocks(full_node_api, our_ph, 6)
-            assert full_node_api.full_node.mempool_manager.get_spendbundle(creation_tx.name) is None
+            assert full_node_api.full_node.mempool_manager.get_spendbundle(creation_tx.id) is None
 
             summaries_response = await client.get_wallets()
             wallet_id: Optional[int] = None
@@ -794,11 +794,11 @@ class TestPoolWalletRpc:
                 10,
                 full_node_api.full_node.mempool_manager.get_spendbundle,
                 creation_tx.spend_bundle,
-                creation_tx.name,
+                creation_tx.id,
             )
 
             await self.farm_blocks(full_node_api, our_ph, 6)
-            assert full_node_api.full_node.mempool_manager.get_spendbundle(creation_tx.name) is None
+            assert full_node_api.full_node.mempool_manager.get_spendbundle(creation_tx.id) is None
 
             summaries_response = await client.get_wallets()
             wallet_id: Optional[int] = None

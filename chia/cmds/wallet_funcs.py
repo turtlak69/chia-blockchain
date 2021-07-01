@@ -25,7 +25,7 @@ def print_transaction(tx: TransactionRecord, verbose: bool, name) -> None:
     else:
         chia_amount = Decimal(int(tx.amount)) / units["chia"]
         to_address = encode_puzzle_hash(tx.to_puzzle_hash, name)
-        print(f"Transaction {tx.name}")
+        print(f"Transaction {tx.id}")
         print(f"Status: {'Confirmed' if tx.confirmed else ('In mempool' if tx.is_in_mempool() else 'Pending')}")
         print(f"Amount: {chia_amount} {name}")
         print(f"To address: {to_address}")
@@ -89,7 +89,7 @@ async def send(args: dict, wallet_client: WalletRpcClient, fingerprint: int) -> 
     final_amount = uint64(int(amount * units["chia"]))
     final_fee = uint64(int(fee * units["chia"]))
     res = await wallet_client.send_transaction(wallet_id, final_amount, address, final_fee)
-    tx_id = res.name
+    tx_id = res.id
     start = time.time()
     while time.time() - start < 10:
         await asyncio.sleep(0.1)

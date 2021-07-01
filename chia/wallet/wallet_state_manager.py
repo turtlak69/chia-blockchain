@@ -745,8 +745,8 @@ class WalletStateManager:
             for unconfirmed_record in all_unconfirmed:
                 for rem_coin in unconfirmed_record.removals:
                     if rem_coin.id() == coin.id():
-                        self.log.info(f"Setting tx_id: {unconfirmed_record.name} to confirmed")
-                        await self.tx_store.set_confirmed(unconfirmed_record.name, height)
+                        self.log.info(f"Setting tx_id: {unconfirmed_record.id} to confirmed")
+                        await self.tx_store.set_confirmed(unconfirmed_record.id, height)
             if record is not None:
                 removed.append(record)
 
@@ -803,7 +803,7 @@ class WalletStateManager:
                 # This is the change from this transaction
                 for record in records:
                     if record.confirmed is False:
-                        await self.tx_store.set_confirmed(record.name, height)
+                        await self.tx_store.set_confirmed(record.id, height)
             else:
                 now = uint64(int(time.time()))
                 tx_record = TransactionRecord(

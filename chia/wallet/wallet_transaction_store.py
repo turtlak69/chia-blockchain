@@ -89,11 +89,11 @@ class WalletTransactionStore:
         self.unconfirmed_for_wallet = {}
 
         for record in all_records:
-            self.tx_record_cache[record.name] = record
+            self.tx_record_cache[record.id] = record
             if record.wallet_id not in self.unconfirmed_for_wallet:
                 self.unconfirmed_for_wallet[record.wallet_id] = {}
             if not record.confirmed:
-                self.unconfirmed_for_wallet[record.wallet_id][record.name] = record
+                self.unconfirmed_for_wallet[record.wallet_id][record.id] = record
 
     async def _clear_database(self):
         cursor = await self.db_connection.execute("DELETE FROM transaction_record")
@@ -104,14 +104,14 @@ class WalletTransactionStore:
         """
         Store TransactionRecord in DB and Cache.
         """
-        self.tx_record_cache[record.name] = record
+        self.tx_record_cache[record.id] = record
         if record.wallet_id not in self.unconfirmed_for_wallet:
             self.unconfirmed_for_wallet[record.wallet_id] = {}
         unconfirmed_dict = self.unconfirmed_for_wallet[record.wallet_id]
-        if record.confirmed and record.name in unconfirmed_dict:
-            unconfirmed_dict.pop(record.name)
+        if record.confirmed and record.id in unconfirmed_dict:
+            unconfirmed_dict.pop(record.id)
         if not record.confirmed:
-            unconfirmed_dict[record.name] = record
+            unconfirmed_dict[record.id] = record
 
         if not in_transaction:
             await self.db_wrapper.lock.acquire()
@@ -120,7 +120,7 @@ class WalletTransactionStore:
                 "INSERT OR REPLACE INTO transaction_record VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 (
                     bytes(record),
-                    record.name,
+                    record.id,
                     record.confirmed_at_height,
                     record.created_at_time,
                     record.to_puzzle_hash.hex(),
@@ -166,7 +166,7 @@ class WalletTransactionStore:
             sent_to=current.sent_to,
             trade_id=None,
             type=current.type,
-            name=current.name,
+            name=current.id,
         )
         await self.add_transaction_record(tx, True)
 
@@ -216,7 +216,7 @@ class WalletTransactionStore:
             sent_to=sent_to,
             trade_id=None,
             type=current.type,
-            name=current.name,
+            name=current.id,
         )
 
         await self.add_transaction_record(tx, False)
@@ -241,7 +241,7 @@ class WalletTransactionStore:
             sent_to=[],
             trade_id=None,
             type=record.type,
-            name=record.name,
+            name=record.id,
         )
         await self.add_transaction_record(tx, True)
 
@@ -436,7 +436,7 @@ class WalletTransactionStore:
             if tx.confirmed_at_height > height:
                 to_delete.append(tx)
         for tx in to_delete:
-            self.tx_record_cache.pop(tx.name)
+            self.tx_record_cache.pop(tx.id)
 
         c1 = await self.db_connection.execute("DELETE FROM transaction_record WHERE confirmed_at_height>?", (height,))
         await c1.close()

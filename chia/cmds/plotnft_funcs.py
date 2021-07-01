@@ -82,10 +82,10 @@ async def create(args: dict, wallet_client: WalletRpcClient, fingerprint: int) -
             start = time.time()
             while time.time() - start < 10:
                 await asyncio.sleep(0.1)
-                tx = await wallet_client.get_transaction(str(1), tx_record.name)
+                tx = await wallet_client.get_transaction(str(1), tx_record.id)
                 if len(tx.sent_to) > 0:
                     print(f"Transaction submitted to nodes: {tx.sent_to}")
-                    print(f"Do chia wallet get_transaction -f {fingerprint} -tx 0x{tx_record.name} to get status")
+                    print(f"Do chia wallet get_transaction -f {fingerprint} -tx 0x{tx_record.id} to get status")
                     return None
         except Exception as e:
             print(f"Error creating plot NFT: {e}")
@@ -248,10 +248,10 @@ async def submit_tx_with_confirmation(
             start = time.time()
             while time.time() - start < 10:
                 await asyncio.sleep(0.1)
-                tx = await wallet_client.get_transaction(str(1), tx_record.name)
+                tx = await wallet_client.get_transaction(str(1), tx_record.id)
                 if len(tx.sent_to) > 0:
                     print(f"Transaction submitted to nodes: {tx.sent_to}")
-                    print(f"Do chia wallet get_transaction -f {fingerprint} -tx 0x{tx_record.name} to get status")
+                    print(f"Do chia wallet get_transaction -f {fingerprint} -tx 0x{tx_record.id} to get status")
                     return None
         except Exception as e:
             print(f"Error performing operation on Plot NFT -f {fingerprint} wallet id: {wallet_id}: {e}")
@@ -311,7 +311,7 @@ async def inspect_cmd(args: dict, wallet_client: WalletRpcClient, fingerprint: i
         {
             "pool_wallet_info": pool_wallet_info,
             "unconfirmed_transactions": [
-                {"sent_to": tx.sent_to, "transaction_id": tx.name.hex()} for tx in unconfirmed_transactions
+                {"sent_to": tx.sent_to, "transaction_id": tx.id.hex()} for tx in unconfirmed_transactions
             ],
         }
     )
